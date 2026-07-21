@@ -1,0 +1,11 @@
+# output dir
+build/
+build-desktop/
+build-web/
+bin/
+web/
+debug/
+
+# artifacts
+compile_commands.json
+web*
