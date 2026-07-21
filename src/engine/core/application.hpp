@@ -11,7 +11,7 @@ namespace varicle {
             // Window configuration variables that a derived game can tweak in its constructor
             int m_window_width = 1280;
             int m_window_height = 720;
-            const char* m_window_title = "My Raylib Engine Game";
+            const char* m_window_title = "Varicle Framework Prototype";
 
         public:
             Application() = default;

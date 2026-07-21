@@ -2,8 +2,6 @@
 #include "engine/core/service-locator.hpp"
 #include "engine/scene/scene.hpp"
 
-#include "game/scenes/game-over-scene/game-over.hpp"
-#include "game/scenes/main-scene/main-scene.hpp"
 #include "game/scenes/menu-scene/menu.hpp"
 
 #include <raylib.h>

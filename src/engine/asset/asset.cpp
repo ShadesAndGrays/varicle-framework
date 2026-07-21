@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <raylib.h>
-#include <asset_packer/asset.hpp>
+#include <asset-packer.hpp>
 
 #include <string>
 #include <iostream>

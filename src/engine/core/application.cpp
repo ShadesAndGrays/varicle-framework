@@ -5,6 +5,7 @@
 #include "engine/asset/raylib-asset.hpp"
 
 #include "engine/scene/scene.hpp"
+#include "imgui.h"
 #include "raylib.h"
 #include "rlImGui.h"
 #include <memory>

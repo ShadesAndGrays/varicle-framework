@@ -1,5 +1,5 @@
 #pragma once
-#include <asset_packer/asset.hpp>
+#include <asset-packer.hpp>
 
 #include <string>
 #include <variant>

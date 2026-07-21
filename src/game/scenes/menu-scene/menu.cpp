@@ -1,15 +1,38 @@
 #include "menu.hpp"
 
+#include "engine/asset/raylib-asset.hpp"
 #include "engine/core/service-locator.hpp"
-#include "raylib.h"
+#include "engine/ecs/components.hpp"
+#include "engine/render/render-system.hpp"
 
 #include <imgui.h>
+#include <iostream>
+#include <memory>
 
-void MenuScene::init() {}
+void MenuScene::init() {
+    using namespace varicle;
+    ServiceLocator::provide(std::make_unique<RaylibAssetLoader>());
+
+
+    auto& asset_loader =ServiceLocator::get<RaylibAssetLoader>(); asset_loader.load_asset("assets/bird.png");
+    auto x = asset_loader.get_reader().get_asset_list();
+    for (auto i :x) {
+        std::cout << i << std::endl;
+    }
+
+    auto e = registry.create();
+    registry.emplace<Position>(e,650.0f,150.0f);
+    auto bird_texture = asset_loader.get_texture("assets/bird.png");
+    registry.emplace<Sprite>(e,bird_texture,0.0f,0.f,100.f,100.f,false,false,0.f);
+    auto img = LoadImageFromTexture(*bird_texture);
+    SetWindowIcon(img);
+    UnloadImage(img);
+
+}
 
 void MenuScene::update(float dt) {}
 
-void MenuScene::render() {}
+void MenuScene::render() { varicle::update_render_system(registry); }
 
 void MenuScene::ui() {
 

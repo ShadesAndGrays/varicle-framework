@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 4.4.0)
 
-
 project(my_app LANGUAGES CXX)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 file( GLOB_RECURSE
     SRC
@@ -14,18 +15,114 @@ file( GLOB_RECURSE
     "src/*.hpp"
 )
 
-message(VERBOSE ${SRC})
 
-add_executable(my_app ${SRC})
+#------------------------------------------------------------------------------------------
+# Subdirectories
+#------------------------------------------------------------------------------------------
 
-INCLUDE_DIRECTORIES("src")
+set(BUILD_EXAMPLES OFF)
+add_subdirectory(vendor/raylib)
+add_subdirectory(vendor/asset-packer)
 
-set_target_properties( my_app PROPERTIES
-    CXX_STANDARD 23
-    CXX_STANDARD_REQUIRED ON
-    CXX_EXTENXSIONS OFF
+
+#------------------------------------------------------------------------------------------
+# GUI
+#------------------------------------------------------------------------------------------
+
+#ImGui
+set(IMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui")
+
+add_library(imgui STATIC
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_demo.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+)
+
+target_include_directories(imgui PUBLIC ${IMGUI_DIR})
+
+# rlImGui
+set(RLIMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/rlImGui")
+
+add_library(rlImGui STATIC
+    ${RLIMGUI_DIR}/rlImGui.cpp
+)
+
+target_include_directories(rlImGui PUBLIC ${RLIMGUI_DIR})
+target_link_libraries(rlImGui PUBLIC imgui raylib)
+
+
+#------------------------------------------------------------------------------------------
+# Executable
+#------------------------------------------------------------------------------------------
+
+add_executable(${PROJECT_NAME} ${SRC})
+
+
+# Export ImGui headers so anything linking to 'imgui' gets them automatically
+target_include_directories(${PROJECT_NAME} PRIVATE vendor/entt src)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    AssetPacker::assetpacker
+    rlImGui
+    imgui
+    raylib
+)
+
+#------------------------------------------------------------------------------------------
+# Make Assets
+#------------------------------------------------------------------------------------------
+
+set(BUILD_ASSET_DIR "${CMAKE_CURRENT_BINARY_DIR}/assets")
+set(PACKED_DATA_FILE "${CMAKE_CURRENT_BINARY_DIR}/data.dat")
+
+add_custom_target( pack-asset
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+            "${BUILD_ASSET_DIR}"
+
+
+    # 2. Pass relative paths to assetpacker!
+    # Because WORKING_DIRECTORY is ${CMAKE_CURRENT_BINARY_DIR},
+    # 'assets' resolves to './assets' and 'data.dat' resolves to './data.dat'
+
+    # Set execution context so relative paths inside assetpacker work
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+
+    COMMAND AssetPacker::packer "assets/"
+
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets" AssetPacker::packer
+    COMMENT "Copying assets folder and packing via relative paths..."
+    VERBATIM
 
 )
 
-target_link_libraries(my_app PRIVATE stdc++exp )
 
+# ------------------------------------------------------------------------------
+# WebAssembly / Emscripten Configurations
+# ------------------------------------------------------------------------------
+
+if(EMSCRIPTEN)
+    # Output an HTML page instead of a raw binary
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        OUTPUT_NAME "index"
+        SUFFIX ".html"
+    )
+
+    # Pass Emscripten linker flags
+    target_link_options(${PROJECT_NAME} PRIVATE
+        "-sUSE_GLFW=3"                  # Needed for Raylib web builds
+        "-sASYNCIFY"                    # Allows main loop to yield to the browser
+        "--shell-file" "${CMAKE_CURRENT_SOURCE_DIR}/html/shell_custom.html" # (Optional) Custom HTML shell
+        # Pre-pack your assets directory into the WebAssembly virtual filesystem
+        "--preload-file" "${CMAKE_CURRENT_BINARY_DIR}/data.dat@/data.dat"
+    )
+
+endif()
+
+add_custom_target( run
+    COMMAND ${PROJECT_NAME}
+    DEPENDS ${PROJECT_NAME}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
