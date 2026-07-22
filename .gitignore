@@ -2,6 +2,7 @@
 build/
 build-desktop/
 build-web/
+dist/
 bin/
 web/
 debug/

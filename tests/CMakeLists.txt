@@ -7,7 +7,7 @@ foreach(TEST_FILE ${TEST_SOURCES})
 
     # Create individual target for this specific test
     add_executable(${TEST_NAME} ${TEST_FILE})
-    target_link_libraries(${TEST_NAME} PRIVATE my_app_lib)
+    target_link_libraries(${TEST_NAME} PRIVATE varicle_lib)
 
     # Register each as an individual test with CTest
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})

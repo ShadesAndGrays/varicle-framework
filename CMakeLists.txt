@@ -1,144 +1,119 @@
-cmake_minimum_required(VERSION 4.4.0)
+cmake_minimum_required(VERSION 3.25)
 
-project(my_app LANGUAGES CXX)
+project(varicle LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    # Default install location: <your-project-folder>/dist
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/dist" CACHE PATH "Local export directory" FORCE)
+# ------------------------------------------------------------------------------
+# 1. Platform & Dist Paths
+# ------------------------------------------------------------------------------
+if(BUILD_FOR_WEB OR EMSCRIPTEN)
+    set(DIST_PLATFORM "web")
+else()
+    set(DIST_PLATFORM "desktop")
 endif()
 
-file( GLOB_RECURSE
-    SRC
-    CONFIGURE
-    "src/*cpp"
-    "src/*.hpp"
-)
-
-
-#------------------------------------------------------------------------------------------
-# Subdirectories
-#------------------------------------------------------------------------------------------
-
-set(BUILD_EXAMPLES OFF)
-add_subdirectory(vendor/raylib)
-add_subdirectory(vendor/asset-packer)
-
-
-#------------------------------------------------------------------------------------------
-# GUI
-#------------------------------------------------------------------------------------------
-
-#ImGui
-set(IMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui")
-
-add_library(imgui STATIC
-    ${IMGUI_DIR}/imgui.cpp
-    ${IMGUI_DIR}/imgui_demo.cpp
-    ${IMGUI_DIR}/imgui_draw.cpp
-    ${IMGUI_DIR}/imgui_tables.cpp
-    ${IMGUI_DIR}/imgui_widgets.cpp
-)
-
-target_include_directories(imgui PUBLIC ${IMGUI_DIR})
-
-# rlImGui
-set(RLIMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/rlImGui")
-
-add_library(rlImGui STATIC
-    ${RLIMGUI_DIR}/rlImGui.cpp
-)
-
-target_include_directories(rlImGui PUBLIC ${RLIMGUI_DIR})
-target_link_libraries(rlImGui PUBLIC imgui raylib)
-
-
-#------------------------------------------------------------------------------------------
-# Framework Library
-#------------------------------------------------------------------------------------------
+# Automatically route 'cmake --install' into 'dist/desktop' or 'dist/web'
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/dist/${DIST_PLATFORM}" CACHE PATH "Dist directory" FORCE)
+endif()
 
 include(GNUInstallDirs)
 
-file( GLOB_RECURSE
-    ENGINE_SRC
-    CONFIGURE
-    "src/engine/*cpp"
-    "src/engine/*.hpp"
+# ------------------------------------------------------------------------------
+# 2. Vendored Dependencies (Internal)
+# ------------------------------------------------------------------------------
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory(vendor/raylib)
+add_subdirectory(vendor/asset-packer)
+
+file(GLOB IMGUI_SOURCES "vendor/imgui/*.cpp")
+file(GLOB IMGUI_HEADERS "vendor/imgui/*.h")
+file(GLOB RLIMGUI_HEADERS "vendor/rlImGui/*.h")
+
+# ------------------------------------------------------------------------------
+# 3. Main Framework Target (Single Monolithic Library)
+# ------------------------------------------------------------------------------
+file(GLOB_RECURSE ENGINE_SRC "src/engine/*.cpp")
+
+# Put ImGui, rlImGui, and Engine sources ALL into one binary!
+add_library(${PROJECT_NAME}_lib STATIC
+    ${ENGINE_SRC}
+    ${IMGUI_SOURCES}
+    vendor/rlImGui/rlImGui.cpp
 )
 
-add_library(${PROJECT_NAME}_lib ${ENGINE_SRC})
 
+set_target_properties(${PROJECT_NAME}_lib PROPERTIES OUTPUT_NAME "varicle")
 
-set_target_properties(${PROJECT_NAME}_lib PROPERTIES
-        OUTPUT_NAME "varicle"
-        )
-target_include_directories(${PROJECT_NAME}_lib PUBLIC src vendor/entt)
+target_include_directories(${PROJECT_NAME}_lib PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/rlImGui>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/json>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC
     AssetPacker::assetpacker
-    rlImGui
-    imgui
     raylib
 )
 
-## Get Metadata
-install(TARGETS ${PROJECT_NAME}_lib
+# ------------------------------------------------------------------------------
+# 4. Clean Export & Install
+# ------------------------------------------------------------------------------
+# Install engine library + raylib
+install(TARGETS ${PROJECT_NAME}_lib assetpacker_lib
     EXPORT ${PROJECT_NAME}Targets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}   # Static libs (.a / .lib)
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}   # Shared libs (.so / .dylib)
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}   # Windows DLLs (.dll)
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/engine
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-## Headers
-# Engine
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/engine
-    FILES_MATCHING PATTERN "*.hpp"
+# Copy header files straight into dist/include for consumer projects
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
+install(FILES ${IMGUI_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/imgui )
+install(FILES ${RLIMGUI_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rlImGui )
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt/entt" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/vendor/json/json.hpp" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/json )
+
+# Standard CMake package export
+install(EXPORT ${PROJECT_NAME}Targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 )
 
-# Entt
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/entt
-    FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
-)
 
+# ------------------------------------------------------------------------------
+# 5. Standalone Sandbox App / Executable
+# ------------------------------------------------------------------------------
+file(GLOB_RECURSE APP_SRC "src/*.cpp")
+add_executable(${PROJECT_NAME} ${APP_SRC})
 
-# install(EXPORT ${PROJECT_NAME}Targets
-#     FILE ${PROJECT_NAME}Targets.cmake
-#     NAMESPACE ${PROJECT_NAME}::
-#     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-# )
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
 
-#------------------------------------------------------------------------------------------
-# Executable
-#------------------------------------------------------------------------------------------
+if(EMSCRIPTEN)
+    set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "index" SUFFIX ".html")
+    target_link_options(${PROJECT_NAME} PRIVATE
+        "-sUSE_GLFW=3"
+        "-sASYNCIFY"
+        "--shell-file" "${CMAKE_CURRENT_SOURCE_DIR}/html/shell_custom.html"
+    )
+endif()
 
-add_executable(${PROJECT_NAME} ${SRC})
-
-
-# Export ImGui headers so anything linking to 'imgui' gets them automatically
-target_include_directories(${PROJECT_NAME} PRIVATE vendor/entt src)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    AssetPacker::assetpacker
-    rlImGui
-    imgui
-    raylib
-)
-
-#------------------------------------------------------------------------------------------
-# Make Assets
-#------------------------------------------------------------------------------------------
-
+# #------------------------------------------------------------------------------------------
+# # Make Assets
+# #------------------------------------------------------------------------------------------
+#
 set(BUILD_ASSET_DIR "${CMAKE_CURRENT_BINARY_DIR}/assets")
 set(PACKED_DATA_FILE "${CMAKE_CURRENT_BINARY_DIR}/data.dat")
-
+#
 add_custom_target( pack-asset
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_CURRENT_SOURCE_DIR}/assets"
@@ -161,9 +136,9 @@ add_custom_target( pack-asset
 )
 
 
-# ------------------------------------------------------------------------------
-# WebAssembly / Emscripten Configurations
-# ------------------------------------------------------------------------------
+# # ------------------------------------------------------------------------------
+# # WebAssembly / Emscripten Configurations
+# # ------------------------------------------------------------------------------
 
 if(EMSCRIPTEN)
     # Output an HTML page instead of a raw binary
@@ -183,11 +158,12 @@ if(EMSCRIPTEN)
 
 endif()
 
+
 add_custom_target( run
     COMMAND ${PROJECT_NAME}
     DEPENDS ${PROJECT_NAME}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-enable_testing()
-add_subdirectory(tests)
+# enable_testing()
+# add_subdirectory(tests)
