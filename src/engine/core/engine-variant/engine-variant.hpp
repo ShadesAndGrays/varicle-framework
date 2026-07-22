@@ -5,10 +5,9 @@
 
 namespace varicle {
 // Overload helper pattern
-template <class... Ts> struct Overloaded : Ts... {
+template <typename... Ts> struct Overloaded : Ts... {
     using Ts::operator()...;
 };
-template <class... Ts> Overloaded(Ts...) -> Overloaded<Ts...>;
 
 struct Vec2 {
     float x = 0.0f;
@@ -59,14 +58,14 @@ struct Vec4 {
 };
 
 // Standalone Interpolation Helpers
-inline Vec2 Vec2Lerp(const Vec2 &s, const Vec2 &e, float a) {
+inline Vec2 vec2_lerp(const Vec2 &s, const Vec2 &e, float a) {
     return {s.x + (e.x - s.x) * a, s.y + (e.y - s.y) * a};
 }
-inline Vec3 Vec3Lerp(const Vec3 &s, const Vec3 &e, float a) {
+inline Vec3 vec3_lerp(const Vec3 &s, const Vec3 &e, float a) {
     return {s.x + (e.x - s.x) * a, s.y + (e.y - s.y) * a,
             s.z + (e.z - s.z) * a};
 }
-inline Vec4 Vec4Lerp(const Vec4 &s, const Vec4 &e, float a) {
+inline Vec4 vec4_lerp(const Vec4 &s, const Vec4 &e, float a) {
     return {s.x + (e.x - s.x) * a, s.y + (e.y - s.y) * a, s.z + (e.z - s.z) * a,
             s.w + (e.w - s.w) * a};
 }
@@ -87,10 +86,12 @@ class EngineVariant {
     EngineVariant(std::string v) : data(v) {}
     EngineVariant(bool v) : data(v) {}
 
-    template <typename T> T Get() const { return std::get<T>(data); }
-    template <typename T> T *TryGet() { return std::get_if<T>(&data); }
+    template <typename T> T get() const { return std::get<T>(data); }
+    template <typename T> const T *try_get() const {
+        return std::get_if<T>(&data);
+    }
 
-    std::string ToString() const {
+    std::string to_string() const {
         return std::visit(
             Overloaded{[](std::monostate) { return std::string("!"); },
                        [](float v) { return std::to_string(v); },
@@ -118,33 +119,23 @@ class EngineVariant {
 
     friend std::ostream &operator<<(std::ostream &os,
                                     const EngineVariant &variant) {
-        return os << variant.GetTypeName() << variant.ToString();
+        return os << variant.get_type_name() << variant.to_string();
     }
 
   private:
     InternalVariant data;
 
-    std::string GetTypeName() const {
+    std::string get_type_name() const {
         return std::visit(
-            [](auto &&arg) -> std::string {
-                using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, std::monostate>)
-                    return "Null";
-                else if constexpr (std::is_same_v<T, float>)
-                    return "Float";
-                else if constexpr (std::is_same_v<T, Vec2>)
-                    return "Vec2";
-                else if constexpr (std::is_same_v<T, Vec3>)
-                    return "Vec3";
-                else if constexpr (std::is_same_v<T, Vec4>)
-                    return "Vec4";
-                else if constexpr (std::is_same_v<T, std::string>)
-                    return "String";
-                else if constexpr (std::is_same_v<T, bool>)
-                    return "Bool";
-                else
-                    return "Unknown";
-            },
+            Overloaded{
+                [](std::monostate) -> std::string { return "Null"; },
+                [](bool) -> std::string { return "Bool"; },
+                [](float) -> std::string { return "Float"; },
+                [](const Vec2 &) -> std::string { return "Vec2"; },
+                [](const Vec3 &) -> std::string { return "Vec3"; },
+                [](const Vec4 &) -> std::string { return "Vec4"; },
+                [](const std::string &) -> std::string { return "String"; },
+                [](const auto &) -> std::string { return "Unknown"; }},
             data);
     }
 

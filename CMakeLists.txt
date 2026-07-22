@@ -8,6 +8,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    # Default install location: <your-project-folder>/dist
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/dist" CACHE PATH "Local export directory" FORCE)
+endif()
+
 file( GLOB_RECURSE
     SRC
     CONFIGURE
@@ -52,6 +57,63 @@ add_library(rlImGui STATIC
 target_include_directories(rlImGui PUBLIC ${RLIMGUI_DIR})
 target_link_libraries(rlImGui PUBLIC imgui raylib)
 
+
+#------------------------------------------------------------------------------------------
+# Framework Library
+#------------------------------------------------------------------------------------------
+
+include(GNUInstallDirs)
+
+file( GLOB_RECURSE
+    ENGINE_SRC
+    CONFIGURE
+    "src/engine/*cpp"
+    "src/engine/*.hpp"
+)
+
+add_library(${PROJECT_NAME}_lib ${ENGINE_SRC})
+
+
+set_target_properties(${PROJECT_NAME}_lib PROPERTIES
+        OUTPUT_NAME "varicle"
+        )
+target_include_directories(${PROJECT_NAME}_lib PUBLIC src vendor/entt)
+
+target_link_libraries(${PROJECT_NAME}_lib PUBLIC
+    AssetPacker::assetpacker
+    rlImGui
+    imgui
+    raylib
+)
+
+## Get Metadata
+install(TARGETS ${PROJECT_NAME}_lib
+    EXPORT ${PROJECT_NAME}Targets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}   # Static libs (.a / .lib)
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}   # Shared libs (.so / .dylib)
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}   # Windows DLLs (.dll)
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/engine
+)
+
+## Headers
+# Engine
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/engine
+    FILES_MATCHING PATTERN "*.hpp"
+)
+
+# Entt
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/entt
+    FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
+)
+
+
+# install(EXPORT ${PROJECT_NAME}Targets
+#     FILE ${PROJECT_NAME}Targets.cmake
+#     NAMESPACE ${PROJECT_NAME}::
+#     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+# )
 
 #------------------------------------------------------------------------------------------
 # Executable
@@ -126,3 +188,6 @@ add_custom_target( run
     DEPENDS ${PROJECT_NAME}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
+
+enable_testing()
+add_subdirectory(tests)

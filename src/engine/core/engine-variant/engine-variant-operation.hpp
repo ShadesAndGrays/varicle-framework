@@ -68,13 +68,13 @@ class VariantOpManager {
                         return p + (n - p) * req.alpha;
                     },
                     [&](Vec2 p, Vec2 n) -> EngineVariant::InternalVariant {
-                        return Vec2Lerp(p, n, req.alpha);
+                        return vec2_lerp(p, n, req.alpha);
                     },
                     [&](Vec3 p, Vec3 n) -> EngineVariant::InternalVariant {
-                        return Vec3Lerp(p, n, req.alpha);
+                        return vec3_lerp(p, n, req.alpha);
                     },
                     [&](Vec4 p, Vec4 n) -> EngineVariant::InternalVariant {
-                        return Vec4Lerp(p, n, req.alpha);
+                        return vec4_lerp(p, n, req.alpha);
                     },
                     [&](const std::string &p, const std::string &n)
                         -> EngineVariant::InternalVariant {

@@ -1,5 +1,6 @@
 #include "bindings.hpp"
 #include "components.hpp"
+#include "engine/core/engine-variant/engine-variant-property-id.hpp"
 
 using namespace entt::literals;
 
@@ -9,84 +10,90 @@ void varicle::register_all_component_properties(PropertyDatabase &db) {
     // LocalTransform2D
     //----------------------------------------------------------
     db.register_property(
-        "position"_hs,
-        PropertyRegistry::bind_field("position"_hs,
+        PropertyID::TransformPosition,
+        PropertyRegistry::bind_field(PropertyID::TransformPosition,
                                      &varicle::LocalTransform2D::position));
 
-    db.register_property("scale"_hs,
-                         PropertyRegistry::bind_field(
-                             "scale"_hs, &varicle::LocalTransform2D::scale));
+    db.register_property(
+        PropertyID::TransformScale,
+        PropertyRegistry::bind_field(PropertyID::TransformScale,
+                                     &varicle::LocalTransform2D::scale));
 
     db.register_property(
-        "rotation"_hs,
-        PropertyRegistry::bind_field("rotation"_hs,
+        PropertyID::TransformRotation,
+        PropertyRegistry::bind_field(PropertyID::TransformRotation,
                                      &varicle::LocalTransform2D::rotation));
 
     //----------------------------------------------------------
     // GlobalTransform2D
     //----------------------------------------------------------
     db.register_property(
-        "global_position"_hs,
-        PropertyRegistry::bind_field("global_position"_hs,
+        PropertyID::GlobalTransformPosition,
+        PropertyRegistry::bind_field(PropertyID::GlobalTransformPosition,
                                      &varicle::GlobalTransform2D::position));
 
-    db.register_property("global_scale"_hs,
-                         PropertyRegistry::bind_field(
-                             "global_scale"_hs, &varicle::GlobalTransform2D::scale));
+    db.register_property(
+        PropertyID::GlobalTransformScale,
+        PropertyRegistry::bind_field(PropertyID::GlobalTransformScale,
+                                     &varicle::GlobalTransform2D::scale));
 
     db.register_property(
-        "global_rotation"_hs,
-        PropertyRegistry::bind_field("global_rotation"_hs,
+        PropertyID::GlobalTransformRotation,
+        PropertyRegistry::bind_field(PropertyID::GlobalTransformRotation,
                                      &varicle::GlobalTransform2D::rotation));
 
     //----------------------------------------------------------
     // Velocity
     //----------------------------------------------------------
 
-    db.register_property(
-        "velocity:x"_hs,
-        PropertyRegistry::bind_field("velocity:x"_hs, &varicle::Velocity::dx));
+    db.register_property(PropertyID::VelocityX,
+                         PropertyRegistry::bind_field(PropertyID::VelocityX,
+                                                      &varicle::Velocity::dx));
 
-    db.register_property(
-        "velocity:y"_hs,
-        PropertyRegistry::bind_field("velocity:y"_hs, &varicle::Velocity::dy));
+    db.register_property(PropertyID::VelocityY,
+                         PropertyRegistry::bind_field(PropertyID::VelocityY,
+                                                      &varicle::Velocity::dy));
 
     //----------------------------------------------------------
     // Sprite
     //----------------------------------------------------------
 
     db.register_property(
-        "sprite:texture_path"_hs,
-        PropertyRegistry::bind_field("sprite:texture_path"_hs, &varicle::Sprite::texture_path));
+        PropertyID::SpriteTexture,
+        PropertyRegistry::bind_field(PropertyID::SpriteTexture,
+                                     &varicle::Sprite::texture_path));
 
     db.register_property(
-        "sprite:offset:y"_hs,
-        PropertyRegistry::bind_field("sprite:offset:y"_hs, &varicle::Sprite::offset_y));
+        PropertyID::SpriteOffsetY,
+        PropertyRegistry::bind_field(PropertyID::SpriteOffsetY,
+                                     &varicle::Sprite::offset_y));
 
     db.register_property(
-        "sprite:offset:x"_hs,
-        PropertyRegistry::bind_field("sprite:offset:x"_hs, &varicle::Sprite::offset_x));
+        PropertyID::SpriteOffsetX,
+        PropertyRegistry::bind_field(PropertyID::SpriteOffsetX,
+                                     &varicle::Sprite::offset_x));
 
-
-    db.register_property(
-        "sprite:width"_hs,
-        PropertyRegistry::bind_field("sprite:width"_hs, &varicle::Sprite::width));
-
-
-    db.register_property(
-        "sprite:height"_hs,
-        PropertyRegistry::bind_field("sprite:height"_hs, &varicle::Sprite::height));
-    
-    db.register_property(
-        "sprite:flip_h"_hs,
-        PropertyRegistry::bind_field("sprite:flip_h"_hs, &varicle::Sprite::flip_h));
+    db.register_property(PropertyID::SpriteWidth,
+                         PropertyRegistry::bind_field(PropertyID::SpriteWidth,
+                                                      &varicle::Sprite::width));
 
     db.register_property(
-        "sprite:flip_v"_hs,
-        PropertyRegistry::bind_field("sprite:flip_v"_hs, &varicle::Sprite::flip_v));
+        PropertyID::SpriteHeight,
+        PropertyRegistry::bind_field(PropertyID::SpriteHeight,
+                                     &varicle::Sprite::height));
 
     db.register_property(
-        "sprite:rotation"_hs,
-        PropertyRegistry::bind_field("sprite:rotation"_hs, &varicle::Sprite::rotation));
+        PropertyID::SpriteFlipH,
+        PropertyRegistry::bind_field(PropertyID::SpriteFlipH,
+                                     &varicle::Sprite::flip_h));
 
+    db.register_property(
+        PropertyID::SpriteFlipV,
+        PropertyRegistry::bind_field(PropertyID::SpriteFlipV,
+                                     &varicle::Sprite::flip_v));
+
+    db.register_property(
+        PropertyID::SpriteRotation,
+        PropertyRegistry::bind_field(PropertyID::SpriteRotation,
+                                     &varicle::Sprite::rotation));
 }
