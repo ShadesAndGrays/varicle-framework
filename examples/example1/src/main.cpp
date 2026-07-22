@@ -5,7 +5,7 @@
 #include "engine/ecs/components.hpp"
 #include "engine/scene/scene.hpp"
 
-#include "game/scenes/menu-scene/menu.hpp"
+#include "scenes/menu-scene/menu.hpp"
 
 #include <entt/entt.hpp>
 #include <raylib.h>

@@ -10,6 +10,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # ------------------------------------------------------------------------------
 # 1. Platform & Dist Paths
 # ------------------------------------------------------------------------------
+
 if(BUILD_FOR_WEB OR EMSCRIPTEN)
     set(DIST_PLATFORM "web")
 else()
@@ -93,19 +94,19 @@ install(EXPORT ${PROJECT_NAME}Targets
 # ------------------------------------------------------------------------------
 # 5. Standalone Sandbox App / Executable
 # ------------------------------------------------------------------------------
-file(GLOB_RECURSE APP_SRC "src/*.cpp")
-add_executable(${PROJECT_NAME} ${APP_SRC})
-
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
-
-if(EMSCRIPTEN)
-    set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "index" SUFFIX ".html")
-    target_link_options(${PROJECT_NAME} PRIVATE
-        "-sUSE_GLFW=3"
-        "-sASYNCIFY"
-        "--shell-file" "${CMAKE_CURRENT_SOURCE_DIR}/html/shell_custom.html"
-    )
-endif()
+# file(GLOB_RECURSE APP_SRC "src/*.cpp")
+# add_executable(${PROJECT_NAME} ${APP_SRC})
+#
+# target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
+#
+# if(EMSCRIPTEN)
+#     set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "index" SUFFIX ".html")
+#     target_link_options(${PROJECT_NAME} PRIVATE
+#         "-sUSE_GLFW=3"
+#         "-sASYNCIFY"
+#         "--shell-file" "${CMAKE_CURRENT_SOURCE_DIR}/html/shell_custom.html"
+#     )
+# endif()
 
 # #------------------------------------------------------------------------------------------
 # # Make Assets
@@ -165,5 +166,9 @@ add_custom_target( run
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
+if (BUILD_EXAMPLES)
+    add_subdirectory(examples/example1)
+    add_subdirectory(examples/example2)
+endif()
 # enable_testing()
 # add_subdirectory(tests)
