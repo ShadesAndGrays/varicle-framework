@@ -1,9 +1,13 @@
 #include "engine/core/application.hpp"
+#include "engine/core/engine-variant/engine-variant-property.hpp"
+#include "engine/core/engine-variant/engine-variant.hpp"
 #include "engine/core/service-locator.hpp"
+#include "engine/ecs/components.hpp"
 #include "engine/scene/scene.hpp"
 
 #include "game/scenes/menu-scene/menu.hpp"
 
+#include <entt/entt.hpp>
 #include <raylib.h>
 
 class Game : public varicle::Application {

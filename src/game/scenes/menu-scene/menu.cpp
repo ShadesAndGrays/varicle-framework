@@ -1,6 +1,8 @@
 #include "menu.hpp"
 
 #include "engine/asset/raylib-asset.hpp"
+#include "engine/core/engine-variant/engine-variant-property.hpp"
+#include "engine/core/engine-variant/engine-variant.hpp"
 #include "engine/core/service-locator.hpp"
 #include "engine/ecs/components.hpp"
 #include "engine/render/render-system.hpp"
@@ -9,25 +11,42 @@
 #include <iostream>
 #include <memory>
 
+using namespace entt::literals;
+
 void MenuScene::init() {
     using namespace varicle;
     ServiceLocator::provide(std::make_unique<RaylibAssetLoader>());
 
-
-    auto& asset_loader =ServiceLocator::get<RaylibAssetLoader>(); asset_loader.load_asset("assets/bird.png");
+    auto &asset_loader = ServiceLocator::get<RaylibAssetLoader>();
+    asset_loader.load_asset("assets/bird.png");
     auto x = asset_loader.get_reader().get_asset_list();
-    for (auto i :x) {
+    for (auto i : x) {
         std::cout << i << std::endl;
     }
 
     auto e = registry.create();
-    registry.emplace<Position>(e,650.0f,150.0f);
-    auto bird_texture = asset_loader.get_texture("assets/bird.png");
-    registry.emplace<Sprite>(e,bird_texture,0.0f,0.f,100.f,100.f,false,false,0.f);
-    auto img = LoadImageFromTexture(*bird_texture);
+    registry.emplace<varicle::GlobalTransform2D>(e, 650.0f, 150.0f, 1.0f,0.0f);
+    // registry.emplace<Position>(e, 650.0f, 150.0f);
+    registry.emplace<Sprite>(e, "assets/bird.png", 0.0f, 0.f, 100.f, 100.f,
+                             false, false, 0.f);
+    auto img =
+        LoadImageFromTexture(*asset_loader.get_texture("assets/bird.png"));
     SetWindowIcon(img);
     UnloadImage(img);
 
+    auto &p_database = varicle::ServiceLocator::get<PropertyDatabase>();
+
+    registry.emplace<varicle::LocalTransform2D>(e, 100.0f, 100.0f, 10.0f,
+                                                5.0f);
+
+    EngineVariant current_pos =
+        p_database.get_value(registry, e, "global_position"_hs);
+    EngineVariant current_scale =
+        p_database.get_value(registry, e, "scale"_hs);
+    EngineVariant current_rot =
+        p_database.get_value(registry, e, "rotation"_hs);
+
+    std::cout << current_pos << current_scale << current_rot << std::endl;
 }
 
 void MenuScene::update(float dt) {}
