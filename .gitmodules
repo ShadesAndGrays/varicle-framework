@@ -3,7 +3,7 @@
 	url = git@github.com:ShadesAndGrays/Asset-Packer.git
 [submodule "vendor/raylib"]
 	path = vendor/raylib
-	url = git@github.com:ShadesAndGrays/Asset-Packer.git
+	url = https://github.com/raysan5/raylib.git
 [submodule "vendor/rlImGui"]
 	path = vendor/rlImGui
 	url = https://github.com/raylib-extras/rlImGui.git
