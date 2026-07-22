@@ -6,10 +6,12 @@
 #include <functional>
 #include <unordered_map>
 
+namespace varicle {
+
 using VariantGetter =
     std::function<EngineVariant(const entt::registry &, entt::entity)>;
-using VariantSetter = std::function<void(entt::registry &, entt::entity,
-                                         const EngineVariant &)>;
+using VariantSetter =
+    std::function<void(entt::registry &, entt::entity, const EngineVariant &)>;
 
 struct PropertyRef {
     uint32_t property_id;
@@ -47,8 +49,7 @@ class PropertyRegistry {
                                    return EngineVariant((*component).*member);
                                }
                                return EngineVariant();
-                           }
-        };
+                           }};
     }
 };
 
@@ -70,8 +71,8 @@ class PropertyDatabase {
         return EngineVariant();
     }
 
-    bool set_value(entt::registry &reg, entt::entity e,
-                   uint32_t prop_hash, const EngineVariant &value) const {
+    bool set_value(entt::registry &reg, entt::entity e, uint32_t prop_hash,
+                   const EngineVariant &value) const {
         auto it = properites.find(prop_hash);
         if (it != properites.end()) {
             it->second.set(reg, e, value);
@@ -80,3 +81,4 @@ class PropertyDatabase {
         return false;
     }
 };
+} // namespace varicle

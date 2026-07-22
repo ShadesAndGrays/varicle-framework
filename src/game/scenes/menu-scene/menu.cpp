@@ -28,7 +28,7 @@ void MenuScene::init() {
     registry.emplace<varicle::GlobalTransform2D>(e, 650.0f, 150.0f, 1.0f,0.0f);
     // registry.emplace<Position>(e, 650.0f, 150.0f);
     registry.emplace<Sprite>(e, "assets/bird.png", 0.0f, 0.f, 100.f, 100.f,
-                             false, false, 0.f);
+                             true, false, 0.f);
     auto img =
         LoadImageFromTexture(*asset_loader.get_texture("assets/bird.png"));
     SetWindowIcon(img);

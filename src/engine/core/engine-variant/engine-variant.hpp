@@ -3,6 +3,7 @@
 #include <string>
 #include <variant>
 
+namespace varicle {
 // Overload helper pattern
 template <class... Ts> struct Overloaded : Ts... {
     using Ts::operator()...;
@@ -75,8 +76,8 @@ enum class VariantType { Null, Float, Vector2, Vector3, Vector4, String };
 class EngineVariant {
 
   public:
-    using InternalVariant =
-        std::variant<std::monostate, float, Vec2, Vec3, Vec4, std::string, bool>;
+    using InternalVariant = std::variant<std::monostate, float, Vec2, Vec3,
+                                         Vec4, std::string, bool>;
 
     EngineVariant() : data(std::monostate{}) {}
     EngineVariant(float v) : data(v) {}
@@ -109,7 +110,9 @@ class EngineVariant {
                                   std::to_string(v.w) + ")";
                        },
                        [](const std::string &s) { return s; },
-                       [](const bool &b) {  return std::string(b ? "true" : "false"); }},
+                       [](const bool &b) {
+                           return std::string(b ? "true" : "false");
+                       }},
             data);
     }
 
@@ -147,3 +150,4 @@ class EngineVariant {
 
     friend class VariantOpManager;
 };
+} // namespace varicle
