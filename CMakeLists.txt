@@ -160,12 +160,6 @@ if(EMSCRIPTEN)
 endif()
 
 
-add_custom_target( run
-    COMMAND ${PROJECT_NAME}
-    DEPENDS ${PROJECT_NAME}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-)
-
 if (BUILD_EXAMPLES)
     add_subdirectory(examples/example1)
     add_subdirectory(examples/example2)
