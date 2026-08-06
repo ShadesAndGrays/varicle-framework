@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.25)
 
 project(varicle LANGUAGES CXX)
 
+option(BUILD_EXAMPLES "Build example applications" OFF)
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -27,8 +29,10 @@ include(GNUInstallDirs)
 # ------------------------------------------------------------------------------
 # 2. Vendored Dependencies (Internal)
 # ------------------------------------------------------------------------------
-set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(VARICLE_BUILD_EXAMPLES ${BUILD_EXAMPLES}) # Store flag value
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # ignore rayblib builds
 add_subdirectory(vendor/raylib)
+set(BUILD_EXAMPLES ${VARICLE_BUILD_EXAMPLES} CACHE BOOL "" FORCE) # retrieve flag
 add_subdirectory(vendor/asset-packer)
 
 file(GLOB IMGUI_SOURCES "vendor/imgui/*.cpp")
@@ -161,8 +165,12 @@ endif()
 
 
 if (BUILD_EXAMPLES)
+    message(STATUS "Building Examples: Enabled")
     add_subdirectory(examples/example1)
     add_subdirectory(examples/example2)
+    add_subdirectory(examples/example3)
+else()
+    message(STATUS "Building Examples: Disabled")
 endif()
 # enable_testing()
 # add_subdirectory(tests)

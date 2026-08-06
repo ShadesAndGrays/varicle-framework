@@ -39,5 +39,14 @@ struct Sprite {
     float rotation;
 };
 
+struct Parent {
+    entt::entity parent = entt::null;
+};
+
+// enables top down traversal
+struct Children {
+    std::vector<entt::entity> children;
+};
+
 
 } // namespace varicle

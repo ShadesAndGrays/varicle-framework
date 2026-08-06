@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(example1 LANGUAGES CXX)
+project(example3 LANGUAGES CXX)
 
 file(GLOB_RECURSE SRCS "src/*.cpp")
 
-MESSAGE(STATUS "Building Example 1")
+MESSAGE(STATUS "Building Example 3")
 
 
 add_executable(${PROJECT_NAME} ${SRCS})

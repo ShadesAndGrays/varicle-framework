@@ -4,7 +4,7 @@ project(example2 LANGUAGES CXX)
 
 file(GLOB_RECURSE SRCS "src/*.cpp")
 
-MESSAGE(STATUS ${SRCS})
+MESSAGE(STATUS "Building Example 2")
 
 
 add_executable(${PROJECT_NAME} ${SRCS})

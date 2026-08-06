@@ -15,8 +15,11 @@ void update_render_system(entt::registry &registry) {
         const Sprite &sprite = view.get<Sprite>(entity);
         auto [global_position, global_scale, global_rotation] =
             view.get<GlobalTransform2D>(entity);
-        auto texture = ServiceLocator::get<RaylibAssetLoader>().get_texture(
-            sprite.texture_path);
+        auto texture =
+            sprite.texture_path == ""
+                ? nullptr
+                : ServiceLocator::get<RaylibAssetLoader>().get_texture(
+                      sprite.texture_path);
 
         float width = sprite.width * global_scale;
         float height = sprite.height * global_scale;
