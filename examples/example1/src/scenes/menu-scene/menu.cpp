@@ -25,10 +25,11 @@ void MenuScene::init() {
     }
 
     auto e = registry.create();
-    registry.emplace<varicle::GlobalTransform2D>(e, 650.0f, 150.0f, 1.0f,0.0f);
+    registry.emplace<varicle::components::GlobalTransform2D>(e, 650.0f, 150.0f,
+                                                             1.0f, 0.0f);
     // registry.emplace<Position>(e, 650.0f, 150.0f);
-    registry.emplace<Sprite>(e, "assets/bird.png", 0.0f, 0.f, 100.f, 100.f,
-                             true, false, 0.f);
+    registry.emplace<components::Sprite>(e, "assets/bird.png", 0.0f, 0.f, 100.f,
+                                         100.f, true, false, 0.f);
     auto img =
         LoadImageFromTexture(*asset_loader.get_texture("assets/bird.png"));
     SetWindowIcon(img);
@@ -36,13 +37,12 @@ void MenuScene::init() {
 
     auto &p_database = varicle::ServiceLocator::get<PropertyDatabase>();
 
-    registry.emplace<varicle::LocalTransform2D>(e, 100.0f, 100.0f, 10.0f,
-                                                5.0f);
+    registry.emplace<varicle::components::LocalTransform2D>(e, 100.0f, 100.0f,
+                                                            10.0f, 5.0f);
 
     EngineVariant current_pos =
         p_database.get_value(registry, e, "global_position"_hs);
-    EngineVariant current_scale =
-        p_database.get_value(registry, e, "scale"_hs);
+    EngineVariant current_scale = p_database.get_value(registry, e, "scale"_hs);
     EngineVariant current_rot =
         p_database.get_value(registry, e, "rotation"_hs);
 

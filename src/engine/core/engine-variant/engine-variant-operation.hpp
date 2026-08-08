@@ -27,7 +27,7 @@ class VariantOpManager {
 
   public:
     VariantOpManager() {}
-    void ExecuteOperation(const VariantOpRequest &req) {
+    static void ExecuteOperation(const VariantOpRequest &req) {
 
         if (req.target == nullptr)
             return;
@@ -98,6 +98,9 @@ class VariantOpManager {
                     },
                     [](Vec2 p, float n) -> EngineVariant::InternalVariant {
                         return p * n;
+                    }, // Scale a vector!
+                    [](float p, Vec2 n) -> EngineVariant::InternalVariant {
+                        return n * p;
                     }, // Scale a vector!
                     [](auto p, auto n) -> EngineVariant::InternalVariant {
                         return p;

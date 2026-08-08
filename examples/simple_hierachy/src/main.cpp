@@ -1,3 +1,4 @@
+#include "scenes/main-scene/main.hpp"
 #include "engine/core/application.hpp"
 #include "engine/core/service-locator.hpp"
 #include "engine/scene/scene.hpp"
@@ -16,7 +17,10 @@ class Game : public varicle::Application {
         scene_manager.register_scene(
             "menu", []() { return std::make_unique<MenuScene>(); });
 
-        change_scene("menu");
+        scene_manager.register_scene(
+            "main", []() { return std::make_unique<MainScene>(); });
+
+        change_scene("main");
     }
 
     void on_shutdown() override {}

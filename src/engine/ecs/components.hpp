@@ -1,52 +1,14 @@
 #pragma once
 
-#include "engine/core/engine-variant/engine-variant.hpp"
-#include <entt/entt.hpp>
-#include <raylib.h>
 
-namespace varicle {
+// aggregate components
+// IWYU pragma: begin_exports
 
-struct Position {
-    float x;
-    float y;
-};
+#include "hierachy.hpp"
+#include "physics.hpp"
+#include "sprite.hpp"
+#include "transform.hpp"
 
-struct Velocity {
-    float dx;
-    float dy;
-};
+// IWYU pragma: end_exports
 
-struct LocalTransform2D {
-    Vec2 position;
-    float scale;
-    float rotation;
-};
-
-struct GlobalTransform2D {
-    Vec2 position;
-    float scale;
-    float rotation;
-};
-
-struct Sprite {
-    std::string texture_path;
-    float offset_x;
-    float offset_y;
-    float width;
-    float height;
-    bool flip_h;
-    bool flip_v;
-    float rotation;
-};
-
-struct Parent {
-    entt::entity parent = entt::null;
-};
-
-// enables top down traversal
-struct Children {
-    std::vector<entt::entity> children;
-};
-
-
-} // namespace varicle
+// namespace varicle::components {} // namespace varicle::components

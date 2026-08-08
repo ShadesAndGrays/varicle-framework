@@ -11,3 +11,4 @@ vendor/
 # artifacts
 compile_commands.json
 web*
+imgui.ini
