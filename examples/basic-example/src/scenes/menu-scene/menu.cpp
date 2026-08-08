@@ -23,10 +23,10 @@ void MenuScene::init() {
     asset_loader.load_asset("assets/bird.png");
 
     // Uncomment to take a peak at the asset that can be loaded
-    auto x = asset_loader.get_reader().get_asset_list();
-    for (auto i : x) {
-        std::cout << i << std::endl;
-    }
+    // auto x = asset_loader.get_reader().get_asset_list();
+    // for (auto i : x) {
+    //     std::cout << i << std::endl;
+    // }
 
     auto e = registry.create();
     // add a sprite_component and transform components to have the sprite be
@@ -36,7 +36,6 @@ void MenuScene::init() {
         {"assets/bird.png", 0.0f, 0.f, 100.f, 100.f, true, false, 0.f});
     TransformUtil::add_transform_components(registry, e);
     TransformUtil::set_position(registry, e, Vec2{650.0f, 150.0f});
-    std::cout << TransformUtil::get_position(registry, e) << std::endl;
 
     // Just changing the window icon
     auto img =
