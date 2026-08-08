@@ -49,9 +49,10 @@ void MenuScene::init() {
     std::cout << current_pos << current_scale << current_rot << std::endl;
 }
 
+void MenuScene::deinit() {}
 void MenuScene::update(float dt) {}
 
-void MenuScene::render() { varicle::update_render_system(registry); }
+void MenuScene::render() { varicle::RenderSystem::update_render_system(registry); }
 
 void MenuScene::ui() {
 

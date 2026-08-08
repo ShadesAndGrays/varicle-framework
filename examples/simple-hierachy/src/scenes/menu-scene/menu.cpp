@@ -48,11 +48,12 @@ void MenuScene::init() {
 
     std::cout << current_pos << current_scale << current_rot << std::endl;
 }
+void MenuScene::deinit() {}
 
 void MenuScene::update(float dt) {}
 
 void MenuScene::render() {
-    varicle::update_render_system(registry);
+    varicle::RenderSystem::update_render_system(registry);
     DrawCircleV({650,400},100,PURPLE);
 
 }

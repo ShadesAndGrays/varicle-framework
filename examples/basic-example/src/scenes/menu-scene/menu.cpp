@@ -15,38 +15,34 @@ using namespace entt::literals;
 
 void MenuScene::init() {
     using namespace varicle;
+    // We provide an asset loader to the global context
     ServiceLocator::provide(std::make_unique<RaylibAssetLoader>());
 
+    // Use asset_loader to load asset into memory from our data store
     auto &asset_loader = ServiceLocator::get<RaylibAssetLoader>();
     asset_loader.load_asset("assets/bird.png");
+
+    // Uncomment to take a peak at the asset that can be loaded
     auto x = asset_loader.get_reader().get_asset_list();
     for (auto i : x) {
         std::cout << i << std::endl;
     }
 
     auto e = registry.create();
-    registry.emplace<components::GlobalTransform2D>(e, 650.0f, 150.0f, 1.0f,
-                                                    0.0f);
-    // registry.emplace<Position>(e, 650.0f, 150.0f);
-    registry.emplace<components::Sprite>(e, "assets/bird.png", 0.0f, 0.f, 100.f,
-                                         100.f, true, false, 0.f);
+    // add a sprite_component and transform components to have the sprite be
+    // rendered
+    SpriteUtil::add_sprite_component(
+        registry, e,
+        {"assets/bird.png", 0.0f, 0.f, 100.f, 100.f, true, false, 0.f});
+    TransformUtil::add_transform_components(registry, e);
+    TransformUtil::set_position(registry, e, Vec2{650.0f, 150.0f});
+    std::cout << TransformUtil::get_position(registry, e) << std::endl;
+
+    // Just changing the window icon
     auto img =
         LoadImageFromTexture(*asset_loader.get_texture("assets/bird.png"));
     SetWindowIcon(img);
     UnloadImage(img);
-
-    auto &p_database = varicle::ServiceLocator::get<PropertyDatabase>();
-
-    registry.emplace<varicle::components::LocalTransform2D>(e, 100.0f, 100.0f,
-                                                            10.0f, 5.0f);
-
-    EngineVariant current_pos =
-        p_database.get_value(registry, e, "global_position"_hs);
-    EngineVariant current_scale = p_database.get_value(registry, e, "scale"_hs);
-    EngineVariant current_rot =
-        p_database.get_value(registry, e, "rotation"_hs);
-
-    std::cout << current_pos << current_scale << current_rot << std::endl;
 }
 
 void MenuScene::deinit() {}
@@ -54,8 +50,9 @@ void MenuScene::deinit() {}
 void MenuScene::update(float dt) {}
 
 void MenuScene::render() {
-    varicle::RenderSystem::update_render_system(registry);
-    DrawCircleV({650, 400}, 100, PURPLE);
+    using namespace varicle;
+    RenderSystem::update_render_system(registry);
+    TransformSystem::update_global_transform(registry);
 }
 
 void MenuScene::ui() {

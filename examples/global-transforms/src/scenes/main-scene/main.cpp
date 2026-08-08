@@ -51,11 +51,15 @@ void MainScene::init() {
     // }
 }
 
+void MainScene::deinit() {}
+
 void MainScene::update(float dt) {
     varicle::TransformSystem::update_global_transform(registry);
 }
 
-void MainScene::render() { varicle::update_render_system(registry); }
+void MainScene::render() {
+    varicle::RenderSystem::update_render_system(registry);
+}
 
 std::string get_name(entt::registry &registry, entt::entity entity) {
     std::string name =

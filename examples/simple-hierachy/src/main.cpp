@@ -12,6 +12,7 @@ class Game : public varicle::Application {
 
   public:
     void on_init() override {
+
         auto &scene_manager =
             varicle::ServiceLocator::get<varicle::SceneManager>();
         scene_manager.register_scene(

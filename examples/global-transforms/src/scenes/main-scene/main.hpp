@@ -5,7 +5,7 @@
 
 namespace v = varicle;
 
-class MenuScene : public v::Scene {
+class MainScene : public v::Scene {
   public:
     entt::registry registry;
     void init() override;

@@ -12,4 +12,5 @@ class MenuScene : public v::Scene {
     void update(float dt) override;
     void render() override;
     void ui() override;
+    void deinit() override;
 };
