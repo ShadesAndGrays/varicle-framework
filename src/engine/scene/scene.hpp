@@ -25,6 +25,7 @@ namespace varicle {
             virtual void update(float dt) = 0;
             virtual void render() = 0;
             virtual void ui() = 0;
+            virtual void deinit() = 0;
     };
 
     // class GamePlayScene : public Scene{

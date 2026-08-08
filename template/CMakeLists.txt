@@ -2,26 +2,22 @@ cmake_minimum_required(VERSION 3.25)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Generates compile_commands.json
 
-project(farm-space LANGUAGES CXX)
+cmake_path(GET CMAKE_CURRENT_SOURCE_DIR FILENAME PROJEC_DIR_NAME ) # Use folder name as project name
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+project(${PROJEC_DIR_NAME} LANGUAGES CXX)
 
+add_subdirectory(varicle) # This adds and exposes varicle as a dependency
 
-target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_SOURCE_DIR}/dist/include
-)
-target_link_directories(${PROJECT_NAME} PUBLIC
-    ${CMAKE_SOURCE_DIR}/dist/lib
-)
+file (GLOB_RECURSE SRCS "src/*.cpp")
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
-    varicle
-    raylib
-    assetpacker
-)
+add_executable(${PROJECT_NAME} ${SRCS})
 
+target_link_libraries(${PROJECT_NAME} PRIVATE varicle_lib)
+
+# If compiling for web
 if(EMSCRIPTEN)
     # Output an HTML page instead of a raw binary
     set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -39,12 +35,20 @@ if(EMSCRIPTEN)
     )
 
 elseif(WIN32)
-    target_link_libraries(farm-space PRIVATE winmm opengl32 gdi32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE winmm opengl32 gdi32)
 endif()
 
-add_custom_target(run
-    COMMAND ${PROJECT_NAME}
-    DEPENDS ${PROJECT_NAME}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-)
+# custom run binary command 
+# add_custom_target(run
+#     COMMAND ${PROJECT_NAME}
+#     DEPENDS ${PROJECT_NAME}
+#     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+# )
+
+# add_custom_target(pack-asset
+#     COMMAND ${CMAKE_BINARY_DIR}/vendor/asset-packer/assetpacker.exe assets/
+#     DEPENDS ${PROJECT_NAME}
+#     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+# )
+
 

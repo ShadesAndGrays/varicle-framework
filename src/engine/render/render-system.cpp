@@ -10,7 +10,7 @@ inline ::Color ToRaylibColor(const varicle::Color &c) {
     return ::Color{c.r, c.g, c.b, c.a};
 }
 
-void varicle::update_render_system(entt::registry &registry) {
+void varicle::RenderSystem::update_render_system(entt::registry &registry) {
     auto view = registry.view<const components::Sprite,
                               const components::GlobalTransform2D>();
 
@@ -30,7 +30,9 @@ void varicle::update_render_system(entt::registry &registry) {
         float height = sprite.height * global_scale;
         float rotation = sprite.rotation + (global_rotation / PI) * 180;
 
-        ::Color raylibTint = texture ? ::WHITE : ::PURPLE; // set default color based on texture presence
+        ::Color raylibTint =
+            texture ? ::WHITE
+                    : ::PURPLE; // set default color based on texture presence
         if (components::Tint *tint_component =
                 registry.try_get<components::Tint>(entity)) {
             raylibTint = ToRaylibColor(tint_component->tint);
