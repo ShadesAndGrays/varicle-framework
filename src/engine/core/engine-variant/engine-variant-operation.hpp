@@ -68,7 +68,7 @@ class VariantOpManager {
             req.target->data = std::visit(
                 overloaded{
                     [&](int p, int n) -> EngineVariant::InternalVariant {
-                        return p + (n - p) * req.alpha;
+                        return static_cast<int>(p + (n - p) * req.alpha);
                     },
                     [&](float p, float n) -> EngineVariant::InternalVariant {
                         return p + (n - p) * req.alpha;

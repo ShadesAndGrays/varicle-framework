@@ -8,6 +8,7 @@
 #include "physics.hpp"
 #include "sprite.hpp"
 #include "transform.hpp"
+#include "animation.hpp"
 
 // IWYU pragma: end_exports
 

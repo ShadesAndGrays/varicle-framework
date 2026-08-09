@@ -5,9 +5,10 @@
 #include "engine/core/engine-variant/engine-variant-property.hpp"
 #include "engine/core/service-locator.hpp"
 
+#include "engine/ecs/animation.hpp"
 #include "engine/ecs/bindings.hpp"
 #include "engine/scene/scene.hpp"
-#include "imgui.h"
+// #include "imgui.h"
 #include "raylib.h"
 #include "rlImGui.h"
 #include <memory>
@@ -54,6 +55,7 @@ void Application::run() {
     ServiceLocator::provide(std::make_unique<PropertyDatabase>());
     ServiceLocator::provide(std::make_unique<RaylibAssetLoader>());
     ServiceLocator::provide(std::make_unique<SceneManager>());
+    ServiceLocator::provide(std::make_unique<AnimationManager>());
 
     register_all_component_properties(ServiceLocator::get<PropertyDatabase>());
 
