@@ -38,6 +38,7 @@ add_subdirectory(vendor/asset-packer)
 file(GLOB IMGUI_SOURCES "vendor/imgui/*.cpp")
 file(GLOB IMGUI_HEADERS "vendor/imgui/*.h")
 file(GLOB RLIMGUI_HEADERS "vendor/rlImGui/*.h")
+file(GLOB RLIMGUI_SOURCES "vendor/rlImGui/*.cpp")
 
 # ------------------------------------------------------------------------------
 # 3. Main Framework Target (Single Monolithic Library)
@@ -48,7 +49,7 @@ file(GLOB_RECURSE ENGINE_SRC "src/engine/*.cpp")
 add_library(${PROJECT_NAME}_lib STATIC
     ${ENGINE_SRC}
     ${IMGUI_SOURCES}
-    vendor/rlImGui/rlImGui.cpp
+    ${RLIMGUI_SOURCES}
 )
 
 
@@ -88,11 +89,11 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt/entt" DESTINATION ${C
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/vendor/json/json.hpp" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/json )
 
 # Standard CMake package export
-install(EXPORT ${PROJECT_NAME}Targets
-    FILE ${PROJECT_NAME}Targets.cmake
-    NAMESPACE ${PROJECT_NAME}::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-)
+# install(EXPORT ${PROJECT_NAME}Targets
+#     FILE ${PROJECT_NAME}Targets.cmake
+#     NAMESPACE ${PROJECT_NAME}::
+#     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+# )
 
 
 # ------------------------------------------------------------------------------

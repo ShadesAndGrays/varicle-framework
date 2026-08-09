@@ -6,7 +6,6 @@ dist/
 bin/
 web/
 debug/
-vendor/
 
 # artifacts
 compile_commands.json
