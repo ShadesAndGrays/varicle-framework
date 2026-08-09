@@ -47,54 +47,105 @@ void varicle::register_all_component_properties(PropertyDatabase &db) {
     // Velocity
     //----------------------------------------------------------
 
-    db.register_property(PropertyID::VelocityX,
-                         PropertyRegistry::bind_field(PropertyID::VelocityX,
-                                                      &Velocity::dx));
+    db.register_property(
+        PropertyID::VelocityX,
+        PropertyRegistry::bind_field(PropertyID::VelocityX, &Velocity::dx));
 
-    db.register_property(PropertyID::VelocityY,
-                         PropertyRegistry::bind_field(PropertyID::VelocityY,
-                                                      &Velocity::dy));
+    db.register_property(
+        PropertyID::VelocityY,
+        PropertyRegistry::bind_field(PropertyID::VelocityY, &Velocity::dy));
 
     //----------------------------------------------------------
     // Sprite
     //----------------------------------------------------------
 
-    db.register_property(
-        PropertyID::SpriteTexture,
-        PropertyRegistry::bind_field(PropertyID::SpriteTexture,
-                                     &Sprite::texture_path));
+    db.register_property(PropertyID::SpriteTexture,
+                         PropertyRegistry::bind_field(PropertyID::SpriteTexture,
+                                                      &Sprite::texture_path));
+
+    db.register_property(PropertyID::SpriteOffsetY,
+                         PropertyRegistry::bind_field(PropertyID::SpriteOffsetY,
+                                                      &Sprite::offset_y));
+
+    db.register_property(PropertyID::SpriteOffsetX,
+                         PropertyRegistry::bind_field(PropertyID::SpriteOffsetX,
+                                                      &Sprite::offset_x));
 
     db.register_property(
-        PropertyID::SpriteOffsetY,
-        PropertyRegistry::bind_field(PropertyID::SpriteOffsetY,
-                                     &Sprite::offset_y));
+        PropertyID::SpriteWidth,
+        PropertyRegistry::bind_field(PropertyID::SpriteWidth, &Sprite::width));
 
-    db.register_property(
-        PropertyID::SpriteOffsetX,
-        PropertyRegistry::bind_field(PropertyID::SpriteOffsetX,
-                                     &Sprite::offset_x));
-
-    db.register_property(PropertyID::SpriteWidth,
-                         PropertyRegistry::bind_field(PropertyID::SpriteWidth,
-                                                      &Sprite::width));
-
-    db.register_property(
-        PropertyID::SpriteHeight,
-        PropertyRegistry::bind_field(PropertyID::SpriteHeight,
-                                     &Sprite::height));
+    db.register_property(PropertyID::SpriteHeight,
+                         PropertyRegistry::bind_field(PropertyID::SpriteHeight,
+                                                      &Sprite::height));
 
     db.register_property(
         PropertyID::SpriteFlipH,
-        PropertyRegistry::bind_field(PropertyID::SpriteFlipH,
-                                     &Sprite::flip_h));
+        PropertyRegistry::bind_field(PropertyID::SpriteFlipH, &Sprite::flip_h));
 
     db.register_property(
         PropertyID::SpriteFlipV,
-        PropertyRegistry::bind_field(PropertyID::SpriteFlipV,
-                                     &Sprite::flip_v));
+        PropertyRegistry::bind_field(PropertyID::SpriteFlipV, &Sprite::flip_v));
+
+    db.register_property(PropertyID::SpriteRotation,
+                         PropertyRegistry::bind_field(
+                             PropertyID::SpriteRotation, &Sprite::rotation));
+
+    //----------------------------------------------------------
+    // AnimatedSprite
+    //----------------------------------------------------------
 
     db.register_property(
-        PropertyID::SpriteRotation,
-        PropertyRegistry::bind_field(PropertyID::SpriteRotation,
-                                     &Sprite::rotation));
+        PropertyID::AnimatedSpriteCellWidth,
+        PropertyRegistry::bind_field(PropertyID::AnimatedSpriteCellWidth,
+                                     &AnimatedSprite::cell_width));
+
+    db.register_property(
+        PropertyID::AnimatedSpriteCellHeight,
+        PropertyRegistry::bind_field(PropertyID::AnimatedSpriteCellHeight,
+                                     &AnimatedSprite::cell_height));
+
+    db.register_property(
+        PropertyID::AnimatedSpriteHCells,
+        PropertyRegistry::bind_field(PropertyID::AnimatedSpriteHCells,
+                                     &AnimatedSprite::h_cells));
+
+    db.register_property(
+        PropertyID::AnimatedSpriteVCells,
+        PropertyRegistry::bind_field(PropertyID::AnimatedSpriteVCells,
+                                     &AnimatedSprite::v_cells));
+
+    db.register_property(
+        PropertyID::AnimatedSpriteTotalFrames,
+        PropertyRegistry::bind_field(PropertyID::AnimatedSpriteTotalFrames,
+                                     &AnimatedSprite::total_frames));
+
+    db.register_property(
+        PropertyID::AnimatedSpriteCurrentFrame,
+        PropertyRegistry::bind_field(PropertyID::AnimatedSpriteCurrentFrame,
+                                     &AnimatedSprite::current_frame));
+
+    //----------------------------------------------------------
+    // Tint
+    //----------------------------------------------------------
+
+    db.register_property(
+        PropertyID::TintColor,
+        PropertyRegistry::bind_field(PropertyID::TintColor, &Tint::tint));
+
+    //----------------------------------------------------------
+    // Parent
+    //----------------------------------------------------------
+
+    db.register_property(
+        PropertyID::Parent,
+        PropertyRegistry::bind_field(PropertyID::Parent, &Parent::parent));
+
+    //----------------------------------------------------------
+    // Children
+    //----------------------------------------------------------
+
+    // db.register_property(PropertyID::Children,
+    //                      PropertyRegistry::bind_field(PropertyID::Children,
+    //                                                   &Children::children));
 }

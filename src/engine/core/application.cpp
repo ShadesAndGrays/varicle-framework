@@ -29,7 +29,7 @@ void game_loop(void) {
 
     // Draw
     BeginDrawing();
-    ClearBackground(RAYWHITE); // Or a configurable engine default color
+    ClearBackground(::RAYWHITE); // Or a configurable engine default color
 
     scene_manager.render();
 

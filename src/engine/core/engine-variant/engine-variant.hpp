@@ -1,7 +1,10 @@
 #pragma once
+#include "engine/core/color.hpp"
 #include <iostream>
 #include <string>
 #include <variant>
+
+#include <entt/entt.hpp>
 
 namespace varicle {
 // Overload helper pattern
@@ -18,6 +21,7 @@ struct Vec2 {
     Vec2 operator+(const Vec2 &o) const { return {x + o.x, y + o.y}; }
     Vec2 operator-(const Vec2 &o) const { return {x - o.x, y - o.y}; }
     Vec2 operator*(float scalar) const { return {x * scalar, y * scalar}; }
+    Vec2 operator*(int scalar) const { return {x * scalar, y * scalar}; }
 };
 
 struct Vec3 {
@@ -32,6 +36,9 @@ struct Vec3 {
     Vec3 operator+(const Vec3 &o) const { return {x + o.x, y + o.y, z + o.z}; }
     Vec3 operator-(const Vec3 &o) const { return {x - o.x, y - o.y, z - o.z}; }
     Vec3 operator*(float scalar) const {
+        return {x * scalar, y * scalar, z * scalar};
+    }
+    Vec3 operator*(int scalar) const {
         return {x * scalar, y * scalar, z * scalar};
     }
 };
@@ -55,6 +62,9 @@ struct Vec4 {
     Vec4 operator*(float scalar) const {
         return {x * scalar, y * scalar, z * scalar, w * scalar};
     }
+    Vec4 operator*(int scalar) const {
+        return {x * scalar, y * scalar, z * scalar, w * scalar};
+    }
 };
 
 // Standalone Interpolation Helpers
@@ -70,31 +80,51 @@ inline Vec4 vec4_lerp(const Vec4 &s, const Vec4 &e, float a) {
             s.w + (e.w - s.w) * a};
 }
 
-enum class VariantType { Null, Float, Vector2, Vector3, Vector4, String };
+// enum class VariantType { Null, Float, Vector2, Vector3, Vector4, String };
 
 class EngineVariant {
 
   public:
-    using InternalVariant = std::variant<std::monostate, float, Vec2, Vec3,
-                                         Vec4, std::string, bool>;
+    using InternalVariant =
+        std::variant<std::monostate, int, float, Vec2, Vec3, Vec4, std::string,
+                     bool, varicle::Color, entt::entity>;
 
     EngineVariant() : data(std::monostate{}) {}
+    EngineVariant(entt::entity v) : data(v) {}
+    EngineVariant(int v) : data(v) {}
     EngineVariant(float v) : data(v) {}
     EngineVariant(Vec2 v) : data(v) {}
     EngineVariant(Vec3 v) : data(v) {}
     EngineVariant(Vec4 v) : data(v) {}
-    EngineVariant(std::string v) : data(v) {}
+    EngineVariant(std::string v) : data(std::move(v)) {}
+    EngineVariant(const char *v) : data(std::string(v)) {}
     EngineVariant(bool v) : data(v) {}
+    EngineVariant(Color v) : data(v) {}
 
     template <typename T> T get() const { return std::get<T>(data); }
     template <typename T> const T *try_get() const {
         return std::get_if<T>(&data);
     }
 
+    operator int() const { return get<int>(); }
+    operator float() const { return get<float>(); }
+    operator Vec2() const { return get<Vec2>(); }
+    operator Vec3() const { return get<Vec3>(); }
+    operator Vec4() const { return get<Vec4>(); }
+    operator Color() const { return get<Color>(); }
+    operator entt::entity() const { return get<entt::entity>(); }
+    operator bool() const { return get<bool>(); }
+    operator std::string() const { return get<std::string>(); }
+
     std::string to_string() const {
         return std::visit(
             Overloaded{[](std::monostate) { return std::string("!"); },
+                       [](entt::entity v) {
+                           return std::to_string(static_cast<uint32_t>(v));
+                       },
+                       [](int v) { return std::to_string(v); },
                        [](float v) { return std::to_string(v); },
+
                        [](const Vec2 &v) {
                            return "(" + std::to_string(v.x) + ", " +
                                   std::to_string(v.y) + ")";
@@ -109,6 +139,12 @@ class EngineVariant {
                                   std::to_string(v.y) + ", " +
                                   std::to_string(v.z) + ", " +
                                   std::to_string(v.w) + ")";
+                       },
+                       [](const varicle::Color &v) {
+                           return "(" + std::to_string(v.r) + ", " +
+                                  std::to_string(v.g) + ", " +
+                                  std::to_string(v.b) + ", " +
+                                  std::to_string(v.a) + ")";
                        },
                        [](const std::string &s) { return s; },
                        [](const bool &b) {
@@ -130,10 +166,13 @@ class EngineVariant {
             Overloaded{
                 [](std::monostate) -> std::string { return "Null"; },
                 [](bool) -> std::string { return "Bool"; },
+                [](entt::entity) -> std::string { return "Entity"; },
+                [](int) -> std::string { return "Int"; },
                 [](float) -> std::string { return "Float"; },
                 [](const Vec2 &) -> std::string { return "Vec2"; },
                 [](const Vec3 &) -> std::string { return "Vec3"; },
                 [](const Vec4 &) -> std::string { return "Vec4"; },
+                [](const varicle::Color &) -> std::string { return "Color"; },
                 [](const std::string &) -> std::string { return "String"; },
                 [](const auto &) -> std::string { return "Unknown"; }},
             data);

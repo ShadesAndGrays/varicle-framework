@@ -40,6 +40,9 @@ class VariantOpManager {
         case OpType::Add:
             req.target->data = std::visit(
                 overloaded{
+                    [](int p, int n) -> EngineVariant::InternalVariant {
+                        return p + n;
+                    },
                     [](float p, float n) -> EngineVariant::InternalVariant {
                         return p + n;
                     },
@@ -64,6 +67,9 @@ class VariantOpManager {
         case OpType::Lerp:
             req.target->data = std::visit(
                 overloaded{
+                    [&](int p, int n) -> EngineVariant::InternalVariant {
+                        return p + (n - p) * req.alpha;
+                    },
                     [&](float p, float n) -> EngineVariant::InternalVariant {
                         return p + (n - p) * req.alpha;
                     },
@@ -75,6 +81,9 @@ class VariantOpManager {
                     },
                     [&](Vec4 p, Vec4 n) -> EngineVariant::InternalVariant {
                         return vec4_lerp(p, n, req.alpha);
+                    },
+                    [&](Color p, Color n) -> EngineVariant::InternalVariant {
+                        return ColorUtil::color_lerp(p, n, req.alpha);
                     },
                     [&](const std::string &p, const std::string &n)
                         -> EngineVariant::InternalVariant {
