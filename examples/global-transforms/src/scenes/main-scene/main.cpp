@@ -28,7 +28,7 @@ void MainScene::init() {
     auto c1 = create_named_entity(registry, "child1");
     auto c2 = create_named_entity(registry, "child2");
     Hierachy::set_parent(registry, c1, p);
-    Hierachy::set_parent(registry, c2, p);
+    Hierachy::set_parent(registry, c2, c1);
 
     auto *children_component = registry.try_get<components::Children>(p);
     std::cout << "Children of " << registry.get<Name>(p).name << std::endl;

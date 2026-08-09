@@ -94,18 +94,15 @@ void AnimationSystem::update_animation_system(entt::registry &registry,
                         current_time < a.timeframe)
                         continue;
 
-                    auto start_value = a.value;
-                    VariantOpManager::ExecuteOperation(
-                        {.target = &start_value,
-                         .operation = OpType::Lerp,
-                         .operand = b.value,
-                         .alpha = (b.timeframe - current_time) /
-                                  (b.timeframe - a.timeframe)});
+                    const float alpha = (b.timeframe - current_time) /
+                                        (b.timeframe - a.timeframe);
 
-                    // std::cout << std::format("time a: {}, b:{} val: {} time:
-                    // {}", a.timeframe,b.timeframe,
-                    // start_value.to_string(),current_time) << std::endl;
-                    pd.set_value(registry, entity, target, start_value);
+                    auto final_value = VariantOpManager::Execute({
+                        a.value,
+                        op::Lerp{b.value, alpha, track.second.interpolation},
+                    });
+
+                    pd.set_value(registry, entity, target, final_value);
                 };
             }
         }

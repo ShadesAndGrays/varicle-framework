@@ -41,7 +41,8 @@ class TransformUtil {
                              EngineVariant p_position) {
         auto &pd = ServiceLocator::get<PropertyDatabase>();
         if (auto prop = p_position.try_get<Vec2>())
-            pd.set_value(registry, entity, PropertyID::TransformPosition, *prop);
+            pd.set_value(registry, entity, PropertyID::TransformPosition,
+                         *prop);
     }
     static void set_scale(entt::registry &registry, entt::entity entity,
                           EngineVariant p_scale) {
@@ -54,7 +55,8 @@ class TransformUtil {
 
         auto &pd = ServiceLocator::get<PropertyDatabase>();
         if (auto prop = p_rotation.try_get<float>())
-            pd.set_value(registry, entity, PropertyID::TransformRotation, *prop);
+            pd.set_value(registry, entity, PropertyID::TransformRotation,
+                         *prop);
     }
     static EngineVariant get_position(entt::registry &registry,
                                       entt::entity entity) {
@@ -158,9 +160,12 @@ class TransformSystem {
             TransformUtil::get_position(registry, entity);
 
         // scale local position
-        VariantOpManager::ExecuteOperation({.target = &local_position,
-                                            .operation = OpType::Multiply,
-                                            .operand = parent_global_scale});
+        // VariantOpManager::ExecuteOperation({.target = &local_position,
+        //                                     .operation = OpType::Multiply,
+        //                                     .operand = parent_global_scale});
+
+        local_position = VariantOpManager::Execute(
+            {local_position, op::Mul{parent_global_scale}});
 
         float angle = parent_global_rotation.get<float>();
         float local_x = local_position.get<Vec2>().x;
@@ -169,15 +174,13 @@ class TransformSystem {
         float rotated_local_x = local_x * cos(angle) - local_y * sin(angle);
         float rotated_local_y = local_x * sin(angle) + local_y * cos(angle);
 
-        VariantOpManager::ExecuteOperation(
-            {.target = &local_position,
-             .operation = OpType::Assign,
-             .operand = Vec2{rotated_local_x, rotated_local_y}});
+        local_position = VariantOpManager::Execute(
+            {local_position,
+             op::Assign{Vec2{rotated_local_x, rotated_local_y}}});
 
-        // add the two positions
-        VariantOpManager::ExecuteOperation({.target = &parent_global_position,
-                                            .operation = OpType::Add,
-                                            .operand = local_position});
+        parent_global_position = VariantOpManager::Execute(
+            {parent_global_position, op::Add{local_position}});
+
 
         registry.get<components::GlobalTransform2D>(entity).position =
             parent_global_position.get<Vec2>(); // force set global transform
@@ -190,10 +193,8 @@ class TransformSystem {
 
         EngineVariant local_scale = TransformUtil::get_scale(registry, entity);
 
-        // add the two positions
-        VariantOpManager::ExecuteOperation({.target = &parent_global_scale,
-                                            .operation = OpType::Multiply,
-                                            .operand = local_scale});
+        parent_global_scale = VariantOpManager::Execute(
+            {.source = parent_global_scale, .operation = op::Mul{local_scale}});
 
         registry.get<components::GlobalTransform2D>(entity).scale =
             parent_global_scale.get<float>(); // force set global transform
@@ -208,10 +209,11 @@ class TransformSystem {
         EngineVariant local_rotation =
             TransformUtil::get_rotation(registry, entity);
 
-        // add the two positions
-        VariantOpManager::ExecuteOperation({.target = &parent_global_rotation,
-                                            .operation = OpType::Add,
-                                            .operand = local_rotation});
+        // add the two rotations
+
+        parent_global_rotation =
+            VariantOpManager::Execute({.source = parent_global_rotation,
+                                       .operation = op::Add{local_rotation}});
 
         registry.get<components::GlobalTransform2D>(entity).rotation =
             parent_global_rotation.get<float>(); // force set global transform

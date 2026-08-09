@@ -1,13 +1,13 @@
 #pragma once
 
 #include "engine-variant.hpp"
+#include "engine/core/lerp.hpp"
 
 namespace varicle {
 
 template <class... Ts> struct overloaded : Ts... {
     using Ts::operator()...;
 };
-template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 enum class OpType {
     Assign,   // Replace the old value entirely
@@ -16,107 +16,115 @@ enum class OpType {
     Lerp      // Smoothly blend toward a value
 };
 
+namespace op {
+struct Assign {
+    EngineVariant value;
+};
+struct Add {
+    EngineVariant value;
+};
+struct Mul {
+    EngineVariant value;
+};
+struct Lerp {
+    EngineVariant value;
+    float alpha;
+
+    // Defaults to linear
+    EaseFunc ease = Ease::linear;
+};
+} // namespace op
+
+using Operation = std::variant<op::Assign, op::Add, op::Mul, op::Lerp>;
+
 struct VariantOpRequest {
-    EngineVariant *target; // The variable we want to change
-    OpType operation;      // How we want to change it
-    EngineVariant operand; // The value we are using to make the change
-    float alpha;           // Used ONLY for Lerp (0.0 to 1.0)
+    EngineVariant source; // The variable we want to change
+    Operation operation;  // How we want to change it
+
+    static VariantOpRequest assign(const EngineVariant &source,
+                                   const EngineVariant &val) {
+        return {source, op::Assign{val}};
+    };
+
+    static VariantOpRequest add(const EngineVariant &source,
+                                const EngineVariant &val) {
+        return {source, op::Add{val}};
+    };
+
+    static VariantOpRequest mul(const EngineVariant &source,
+                                const EngineVariant &val) {
+        return {source, op::Mul{val}};
+    };
+
+    static VariantOpRequest lerp(const EngineVariant &source,
+                                 const EngineVariant &target_val, float alpha,
+                                 EaseFunc ease = Ease::linear) {
+        return {source, op::Lerp{
+                            target_val,
+                            alpha,
+                            ease,
+                        }};
+    };
 };
 
 class VariantOpManager {
 
   public:
     VariantOpManager() {}
-    static void ExecuteOperation(const VariantOpRequest &req) {
+    static EngineVariant Execute(const VariantOpRequest &req) {
+        EngineVariant result;
 
-        if (req.target == nullptr)
-            return;
-
-        switch (req.operation) {
-
-        case OpType::Assign:
-            req.target->data = req.operand.data;
-            break;
-        case OpType::Add:
-            req.target->data = std::visit(
-                overloaded{
-                    [](int p, int n) -> EngineVariant::InternalVariant {
-                        return p + n;
-                    },
-                    [](float p, float n) -> EngineVariant::InternalVariant {
-                        return p + n;
-                    },
-                    [](Vec2 p, Vec2 n) -> EngineVariant::InternalVariant {
-                        return p + n;
-                    },
-                    [](Vec3 p, Vec3 n) -> EngineVariant::InternalVariant {
-                        return p + n;
-                    },
-                    [](Vec4 p, Vec4 n) -> EngineVariant::InternalVariant {
-                        return p + n;
-                    },
-
-                    // Fallback
-                    [](auto p, auto n) -> EngineVariant::InternalVariant {
-                        return p;
-                    },
+        std::visit(
+            Overloaded{
+                [&](const op::Assign &op) { result = op.value; },
+                [&](const op::Add &op) {
+                    result.data = std::visit(
+                        [](const auto &a,
+                           const auto &b) -> EngineVariant::InternalVariant {
+                            if constexpr (requires { a + b; })
+                                return a + b;
+                            return a;
+                        },
+                        req.source.data, op.value.data);
                 },
-                req.target->data, req.operand.data);
-            break;
+                [&](const op::Mul &op) {
+                    result.data = std::visit(
+                        [](const auto &a,
+                           const auto &b) -> EngineVariant::InternalVariant {
+                            if constexpr (requires { a * b; })
+                                return a * b;
+                            return a;
+                        },
+                        req.source.data, op.value.data);
+                },
+                [&](const op::Lerp &op) {
+                    const float eased_t =
+                        op.ease ? op.ease(op.alpha) : op.alpha;
 
-        case OpType::Lerp:
-            req.target->data = std::visit(
-                overloaded{
-                    [&](int p, int n) -> EngineVariant::InternalVariant {
-                        return static_cast<int>(p + (n - p) * req.alpha);
-                    },
-                    [&](float p, float n) -> EngineVariant::InternalVariant {
-                        return p + (n - p) * req.alpha;
-                    },
-                    [&](Vec2 p, Vec2 n) -> EngineVariant::InternalVariant {
-                        return vec2_lerp(p, n, req.alpha);
-                    },
-                    [&](Vec3 p, Vec3 n) -> EngineVariant::InternalVariant {
-                        return vec3_lerp(p, n, req.alpha);
-                    },
-                    [&](Vec4 p, Vec4 n) -> EngineVariant::InternalVariant {
-                        return vec4_lerp(p, n, req.alpha);
-                    },
-                    [&](Color p, Color n) -> EngineVariant::InternalVariant {
-                        return ColorUtil::color_lerp(p, n, req.alpha);
-                    },
-                    [&](const std::string &p, const std::string &n)
-                        -> EngineVariant::InternalVariant {
-                        return req.alpha >= 0.5f
-                                   ? n
-                                   : p; // Discrete switch for strings
-                    },
+                    result.data = std::visit(
+                        [eased_t](const auto &a, const auto &b)
+                            -> EngineVariant::InternalVariant {
+                            using T = std::decay_t<decltype(a)>;
+                            using U = std::decay_t<decltype(b)>;
 
-                    // Fallback
-                    [](auto p, auto n) -> EngineVariant::InternalVariant {
-                        return p;
-                    }},
-                req.target->data, req.operand.data);
-            break;
+                            if constexpr (std::is_same_v<T, U>) {
+                                if constexpr (requires {
+                                                  LerpUtil::lerp(a, b, eased_t);
+                                              }) {
+                                    return LerpUtil::lerp(a, b, eased_t);
+                                } else if constexpr (std::is_same_v<
+                                                         T, std::string>) {
+                                    return eased_t >= 0.5 ? b : a;
+                                }
+                            }
+                            return a;
+                        },
+                        req.source.data, op.value.data);
+                },
+            },
+            req.operation);
 
-        case OpType::Multiply:
-            req.target->data = std::visit(
-                overloaded{
-                    [](float p, float n) -> EngineVariant::InternalVariant {
-                        return p * n;
-                    },
-                    [](Vec2 p, float n) -> EngineVariant::InternalVariant {
-                        return p * n;
-                    }, // Scale a vector!
-                    [](float p, Vec2 n) -> EngineVariant::InternalVariant {
-                        return n * p;
-                    }, // Scale a vector!
-                    [](auto p, auto n) -> EngineVariant::InternalVariant {
-                        return p;
-                    }},
-                req.target->data, req.operand.data);
-            break;
-        }
+        return result;
     }
 };
 

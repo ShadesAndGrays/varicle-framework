@@ -1,13 +1,12 @@
 #pragma once
 
 #include "engine/core/engine-variant/engine-variant.hpp"
+#include "engine/core/lerp.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>
 
 namespace varicle {
-
-enum KEYFRAME_INTERPOLATION { DISCRETE, LINEAR };
 
 struct Key {
     float timeframe;
@@ -16,7 +15,7 @@ struct Key {
 
 struct Track {
     // key
-    KEYFRAME_INTERPOLATION interpolation; // key to key sampling
+    EaseFunc interpolation = Ease::linear; // key to key sampling
     std::vector<Key> keys;                // keyframes
 
     std::uint32_t target; // property hash

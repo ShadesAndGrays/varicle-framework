@@ -80,8 +80,6 @@ inline Vec4 vec4_lerp(const Vec4 &s, const Vec4 &e, float a) {
             s.w + (e.w - s.w) * a};
 }
 
-// enum class VariantType { Null, Float, Vector2, Vector3, Vector4, String };
-
 class EngineVariant {
 
   public:
@@ -118,44 +116,42 @@ class EngineVariant {
 
     std::string to_string() const {
         return std::visit(
-            Overloaded{[](std::monostate) { return std::string("!"); },
-                       [](entt::entity v) {
-                           return std::to_string(static_cast<uint32_t>(v));
-                       },
-                       [](int v) { return std::to_string(v); },
-                       [](float v) { return std::to_string(v); },
+            Overloaded{
+                [](std::monostate) { return std::string("!"); },
+                [](entt::entity v) {
+                    return std::to_string(static_cast<uint32_t>(v));
+                },
+                [](int v) { return std::to_string(v); },
+                [](float v) { return std::to_string(v); },
 
-                       [](const Vec2 &v) {
-                           return "(" + std::to_string(v.x) + ", " +
-                                  std::to_string(v.y) + ")";
-                       },
-                       [](const Vec3 &v) {
-                           return "(" + std::to_string(v.x) + ", " +
-                                  std::to_string(v.y) + ", " +
-                                  std::to_string(v.z) + ")";
-                       },
-                       [](const Vec4 &v) {
-                           return "(" + std::to_string(v.x) + ", " +
-                                  std::to_string(v.y) + ", " +
-                                  std::to_string(v.z) + ", " +
-                                  std::to_string(v.w) + ")";
-                       },
-                       [](const varicle::Color &v) {
-                           return "(" + std::to_string(v.r) + ", " +
-                                  std::to_string(v.g) + ", " +
-                                  std::to_string(v.b) + ", " +
-                                  std::to_string(v.a) + ")";
-                       },
-                       [](const std::string &s) { return s; },
-                       [](const bool &b) {
-                           return std::string(b ? "true" : "false");
-                       }},
+                [](const Vec2 &v) {
+                    return std::to_string(v.x) + ", " + std::to_string(v.y);
+                },
+                [](const Vec3 &v) {
+                    return std::to_string(v.x) + ", " + std::to_string(v.y) +
+                           ", " + std::to_string(v.z);
+                },
+                [](const Vec4 &v) {
+                    return std::to_string(v.x) + ", " + std::to_string(v.y) +
+                           ", " + std::to_string(v.z) + ", " +
+                           std::to_string(v.w);
+                },
+                [](const varicle::Color &v) {
+                    return std::to_string(v.r) + ", " + std::to_string(v.g) +
+                           ", " + std::to_string(v.b) + ", " +
+                           std::to_string(v.a);
+                },
+                [](const std::string &s) { return s; },
+                [](const bool &b) {
+                    return std::string(b ? "true" : "false");
+                }},
             data);
     }
 
     friend std::ostream &operator<<(std::ostream &os,
                                     const EngineVariant &variant) {
-        return os << variant.get_type_name() << variant.to_string();
+        return os << variant.get_type_name() << "(" << variant.to_string()
+                  << ")";
     }
 
   private:
