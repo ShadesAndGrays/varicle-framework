@@ -15,8 +15,10 @@ struct Key {
 
 struct Track {
     // key
-    EaseFunc interpolation = Ease::linear; // key to key sampling
-    std::vector<Key> keys;                // keyframes
+    CurveFunc interpolation = Curve::linear; // key to key sampling
+    EaseMode mode = EaseMode::In; 
+
+    std::vector<Key> keys; // keyframes
 
     std::uint32_t target; // property hash
 };

@@ -7,20 +7,23 @@
 
 namespace varicle {
 
-using EaseFunc = std::function<float(float)>;
+using CurveFunc = std::function<float(float)>;
 
-class Ease {
-  public:
+enum class EaseMode { In, Out, InOut, OutIn };
+
+class Curve {
+  private:
     static inline float clamp01(float t) { return std::clamp(t, 0.0f, 1.0f); }
 
+  public:
     static float linear(float t) { return clamp01(t); }
 
-    static float quad_in(float t) {
+    static float quad(float t) {
         t = clamp01(t);
         return t * t;
     }
 
-    static float cubic_in(float t) {
+    static float cubic(float t) {
         t = clamp01(t);
         return t * t * t;
     }
@@ -30,14 +33,18 @@ class Ease {
         return t * t * (3.0f - 2.0f * t);
     }
 
-    static float power_out(float t, float k = 10.0f) {
+    static float exponential(float t, float k = 10.0f) {
         t = clamp01(t);
-        const float top = 1.0f - std::exp2f(-k * t);
+
+        if (std::abs(k) < 0.0001f)
+            return t;
+
+        const float top = 1.0f - std::exp2f(-k * (1.0f - t));
         const float bottom = 1.0f - std::exp2f(-k);
-        return top / bottom;
+        return 1.0f - (top / bottom);
     }
 
-    static float bounce_out(float t, float damping = 8.0f,
+    static float bounce(float t, float damping = 8.0f,
                             float frequency = 3.0f) {
         t = clamp01(t);
         const float decay = std::exp2f(-damping * t);
@@ -66,10 +73,39 @@ class LerpUtil {
         return t < 1.0f ? a : b;
     }
 
-    // Applied Easing any func
-    template <typename T, typename EaseFunc>
-    static T eased_lerp(T a, T b, float alpha, EaseFunc ease_fn) {
-        return LerpUtil::lerp(a, b, ease_fn(alpha));
+    // Applied Easing any curve
+    template <typename CurveFunc>
+    static float ease(float alpha, CurveFunc curve_fn = Curve::linear,
+                      EaseMode mode = EaseMode::In) {
+        auto t = std::clamp(alpha, 0.0f, 1.0f);
+
+        switch (mode) {
+        case EaseMode::In:
+            return curve_fn(t);
+        case EaseMode::Out:
+            return 1.0f - curve_fn(1.0f - t);
+        case EaseMode::InOut:
+            if (t < 0.5f) {
+                return 0.5f * curve_fn(2.0f * t);
+            } else {
+                return 1.0f - 0.5f * curve_fn(2.0f * (1.0f - t));
+            }
+        case EaseMode::OutIn:
+            if (t < 0.5f) {
+                return 0.5f * (1.0f - curve_fn(1.0f - 2.0f * t));
+            } else {
+                return 0.5f + 0.5f * curve_fn(2.0f * t - 1.0f);
+            }
+        default: // default to In
+            return curve_fn(t);
+        }
+    }
+
+    template <typename T, typename CurveFunc>
+    static T eased_lerp(T a, T b, float alpha, CurveFunc curve_fn,
+                        EaseMode mode = EaseMode::In) {
+        auto t = ease(alpha, curve_fn, mode);
+        return LerpUtil::lerp(a, b, t);
     }
 };
 

@@ -31,7 +31,9 @@ struct Lerp {
     float alpha;
 
     // Defaults to linear
-    EaseFunc ease = Ease::linear;
+    CurveFunc curve = Curve::linear;
+    // Defaults to In
+    EaseMode ease = EaseMode::In;
 };
 } // namespace op
 
@@ -58,10 +60,12 @@ struct VariantOpRequest {
 
     static VariantOpRequest lerp(const EngineVariant &source,
                                  const EngineVariant &target_val, float alpha,
-                                 EaseFunc ease = Ease::linear) {
+                                 CurveFunc curve = Curve::linear,
+                                 EaseMode ease = EaseMode::In) {
         return {source, op::Lerp{
                             target_val,
                             alpha,
+                            curve,
                             ease,
                         }};
     };
@@ -98,8 +102,7 @@ class VariantOpManager {
                         req.source.data, op.value.data);
                 },
                 [&](const op::Lerp &op) {
-                    const float eased_t =
-                        op.ease ? op.ease(op.alpha) : op.alpha;
+                    const float eased_t = LerpUtil::ease(op.alpha,op.curve,op.ease);
 
                     result.data = std::visit(
                         [eased_t](const auto &a, const auto &b)

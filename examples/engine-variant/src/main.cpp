@@ -68,7 +68,7 @@ int main() {
     for (int step = 0; step <= 10; step += 1) {
         float i = step * 0.1f;
         std::cout << i << ": "
-                  << v::VariantOpManager::Execute({vec_a, v::op::Lerp{vec_b, i,v::Ease::quad_in}})
+                  << v::VariantOpManager::Execute({vec_a, v::op::Lerp{vec_b, i,v::Curve::linear}})
                   << " ";
     }
     std::cout << std::endl;

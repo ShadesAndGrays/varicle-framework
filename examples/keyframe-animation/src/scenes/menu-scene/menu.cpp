@@ -53,28 +53,27 @@ void MenuScene::init() {
     auto &anim_manager = ServiceLocator::get<AnimationManager>();
     anim_manager.add_animation("hover_animation");
     anim_manager.add_track("hover_animation"_hs,
-                           Track{KEYFRAME_INTERPOLATION::DISCRETE,
+                           Track{Curve::linear,
+                                 EaseMode::In,
                                  {
-                                 Key{0.0f,0},
-                                 Key{0.3f,1},
-                                 Key{.6f,2},
-                                 Key{.9f,3},
-                                 // Key{4,4},
-                               },
-                               PropertyID::AnimatedSpriteCurrentFrame
-                               });
-    anim_manager.set_animation_duration("hover_animation"_hs,1.2f);
-    
+                                     Key{0.0f, 0},
+                                     Key{0.3f, 1},
+                                     Key{.6f, 2},
+                                     Key{.9f, 3},
+                                     // Key{4,4},
+                                 },
+                                 PropertyID::AnimatedSpriteCurrentFrame});
+    anim_manager.set_animation_duration("hover_animation"_hs, 1.2f);
 
-    AnimationUtil::add_animator_component(registry, e,
-                                          Animator{
-                                          .animation_name = "hover_animation"_hs,
-                                          .playing = true,
-                                          .looping = false,
-                                          .reverse = true,
-                                          .play_speed = 0.1f,
-            });
-
+    AnimationUtil::add_animator_component(
+        registry, e,
+        Animator{
+            .animation_name = "hover_animation"_hs,
+            .playing = true,
+            .looping = false,
+            .reverse = true,
+            .play_speed = 0.1f,
+        });
 }
 
 void MenuScene::deinit() {}

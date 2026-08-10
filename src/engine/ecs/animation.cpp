@@ -99,7 +99,8 @@ void AnimationSystem::update_animation_system(entt::registry &registry,
 
                     auto final_value = VariantOpManager::Execute({
                         a.value,
-                        op::Lerp{b.value, alpha, track.second.interpolation},
+                        op::Lerp{b.value, alpha, track.second.interpolation,
+                                 track.second.mode},
                     });
 
                     pd.set_value(registry, entity, target, final_value);
