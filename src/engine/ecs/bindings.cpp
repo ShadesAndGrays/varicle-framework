@@ -1,6 +1,7 @@
 #include "bindings.hpp"
 #include "components.hpp"
 #include "engine/core/engine-variant/engine-variant-property-id.hpp"
+#include "engine/ecs/physics.hpp"
 
 using namespace entt::literals;
 using namespace varicle::components;
@@ -44,16 +45,12 @@ void varicle::register_all_component_properties(PropertyDatabase &db) {
                                      &GlobalTransform2D::rotation));
 
     //----------------------------------------------------------
-    // Velocity
+    // Physics
     //----------------------------------------------------------
 
     db.register_property(
-        PropertyID::VelocityX,
-        PropertyRegistry::bind_field(PropertyID::VelocityX, &Velocity::dx));
-
-    db.register_property(
-        PropertyID::VelocityY,
-        PropertyRegistry::bind_field(PropertyID::VelocityY, &Velocity::dy));
+        PropertyID::Body2D_ID,
+        PropertyRegistry::bind_field(PropertyID::Body2D_ID, &Body2D::body_id));
 
     //----------------------------------------------------------
     // Sprite

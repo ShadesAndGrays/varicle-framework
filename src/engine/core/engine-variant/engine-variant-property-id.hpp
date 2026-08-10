@@ -18,9 +18,8 @@ constexpr auto GlobalTransformPosition = "global_transform:position"_hs;
 constexpr auto GlobalTransformScale = "global_transform:scale"_hs;
 constexpr auto GlobalTransformRotation = "global_transform:rotation"_hs;
 
-// Velocity Property IDs
-constexpr auto VelocityX = "velocity:x"_hs;
-constexpr auto VelocityY = "velocity:y"_hs;
+// Physics Property IDs
+constexpr auto Body2D_ID = "body_id"_hs;
 
 // Sprite Property IDs
 constexpr auto SpriteRotation = "sprite:rotation"_hs;

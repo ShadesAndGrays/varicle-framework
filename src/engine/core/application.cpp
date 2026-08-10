@@ -7,6 +7,7 @@
 
 #include "engine/ecs/animation.hpp"
 #include "engine/ecs/bindings.hpp"
+#include "engine/physics/physics.hpp"
 #include "engine/scene/scene.hpp"
 // #include "imgui.h"
 #include "raylib.h"
@@ -22,11 +23,13 @@ namespace varicle {
 void game_loop(void) {
 
     auto &scene_manager = ServiceLocator::get<SceneManager>();
+    auto &physics_sever = ServiceLocator::get<physics::PhysicsServer2D>();
 
     float dt = GetFrameTime();
 
     // Update
     scene_manager.update(dt);
+    physics_sever.step(dt);
 
     // Draw
     BeginDrawing();
@@ -56,6 +59,7 @@ void Application::run() {
     ServiceLocator::provide(std::make_unique<RaylibAssetLoader>());
     ServiceLocator::provide(std::make_unique<SceneManager>());
     ServiceLocator::provide(std::make_unique<AnimationManager>());
+    ServiceLocator::provide(std::make_unique<physics::PhysicsServer2D>());
 
     register_all_component_properties(ServiceLocator::get<PropertyDatabase>());
 

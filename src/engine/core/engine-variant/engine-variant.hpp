@@ -1,5 +1,6 @@
 #pragma once
 #include "engine/core/color.hpp"
+#include "engine/util/slot-map.hpp"
 #include <iostream>
 #include <string>
 #include <variant>
@@ -85,7 +86,7 @@ class EngineVariant {
   public:
     using InternalVariant =
         std::variant<std::monostate, int, float, Vec2, Vec3, Vec4, std::string,
-                     bool, varicle::Color, entt::entity>;
+                     bool, varicle::Color, entt::entity, structures::SlotID>;
 
     EngineVariant() : data(std::monostate{}) {}
     EngineVariant(entt::entity v) : data(v) {}
@@ -98,6 +99,7 @@ class EngineVariant {
     EngineVariant(const char *v) : data(std::string(v)) {}
     EngineVariant(bool v) : data(v) {}
     EngineVariant(Color v) : data(v) {}
+    EngineVariant(structures::SlotID v) : data(v) {}
 
     template <typename T> T get() const { return std::get<T>(data); }
     template <typename T> const T *try_get() const {
@@ -142,9 +144,8 @@ class EngineVariant {
                            std::to_string(v.a);
                 },
                 [](const std::string &s) { return s; },
-                [](const bool &b) {
-                    return std::string(b ? "true" : "false");
-                }},
+                [](const bool &b) { return std::string(b ? "true" : "false"); },
+                [](const structures::SlotID &v) { return v.to_string(); }},
             data);
     }
 
@@ -170,6 +171,7 @@ class EngineVariant {
                 [](const Vec4 &) -> std::string { return "Vec4"; },
                 [](const varicle::Color &) -> std::string { return "Color"; },
                 [](const std::string &) -> std::string { return "String"; },
+                [](const structures::SlotID &) -> std::string { return "ID"; },
                 [](const auto &) -> std::string { return "Unknown"; }},
             data);
     }
