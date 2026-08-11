@@ -39,14 +39,13 @@ class Curve {
         if (std::abs(k) < 0.0001f)
             return t;
 
-        const float top = 1.0f - std::exp2f(-k * (1.0f - t));
+        const float top    = 1.0f - std::exp2f(-k * (1.0f - t));
         const float bottom = 1.0f - std::exp2f(-k);
         return 1.0f - (top / bottom);
     }
 
-    static float bounce(float t, float damping = 8.0f,
-                            float frequency = 3.0f) {
-        t = clamp01(t);
+    static float bounce(float t, float damping = 8.0f, float frequency = 3.0f) {
+        t                 = clamp01(t);
         const float decay = std::exp2f(-damping * t);
         const float wave =
             std::abs(std::cos((0.5f + frequency) * constants::pi * t));
@@ -75,8 +74,11 @@ class LerpUtil {
 
     // Applied Easing any curve
     template <typename CurveFunc>
-    static float ease(float alpha, CurveFunc curve_fn = Curve::linear,
-                      EaseMode mode = EaseMode::In) {
+    static float ease(
+        float     alpha,
+        CurveFunc curve_fn = Curve::linear,
+        EaseMode  mode     = EaseMode::In
+    ) {
         auto t = std::clamp(alpha, 0.0f, 1.0f);
 
         switch (mode) {
@@ -102,8 +104,13 @@ class LerpUtil {
     }
 
     template <typename T, typename CurveFunc>
-    static T eased_lerp(T a, T b, float alpha, CurveFunc curve_fn,
-                        EaseMode mode = EaseMode::In) {
+    static T eased_lerp(
+        T         a,
+        T         b,
+        float     alpha,
+        CurveFunc curve_fn,
+        EaseMode  mode = EaseMode::In
+    ) {
         auto t = ease(alpha, curve_fn, mode);
         return LerpUtil::lerp(a, b, t);
     }

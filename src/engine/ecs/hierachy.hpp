@@ -18,8 +18,11 @@ namespace varicle {
 
 class Hierachy {
   public:
-    static void set_parent(entt::registry &registry, entt::entity child,
-                           entt::entity parent) {
+    static void set_parent(
+        entt::registry& registry,
+        entt::entity    child,
+        entt::entity    parent
+    ) {
         remove_parent(registry, child);
 
         if (parent == entt::null)
@@ -27,13 +30,13 @@ class Hierachy {
 
         registry.emplace_or_replace<components::Parent>(child, parent);
 
-        auto &children_component =
+        auto& children_component =
             registry.get_or_emplace<components::Children>(parent);
         children_component.children.push_back(child);
     }
 
-    static void remove_parent(entt::registry &registry, entt::entity child) {
-        components::Parent *parent_component =
+    static void remove_parent(entt::registry& registry, entt::entity child) {
+        components::Parent* parent_component =
             registry.try_get<components::Parent>(child);
 
         if (!parent_component ||
@@ -42,9 +45,9 @@ class Hierachy {
 
         entt::entity previous_parent = parent_component->parent;
 
-        if (auto *children_component =
+        if (auto* children_component =
                 registry.try_get<components::Children>(previous_parent)) {
-            auto &children = children_component->children;
+            auto& children = children_component->children;
             std::erase(children, child);
 
             if (children.empty()) { // if no more children
@@ -55,8 +58,8 @@ class Hierachy {
         registry.remove<components::Parent>(child);
     }
 
-    static void destroy_entity(entt::registry &registry, entt::entity entity) {
-        if (auto *children_component =
+    static void destroy_entity(entt::registry& registry, entt::entity entity) {
+        if (auto* children_component =
                 registry.try_get<components::Children>(entity)) {
             auto children_copy = children_component->children;
             for (auto child : children_copy) {
@@ -69,19 +72,19 @@ class Hierachy {
         registry.destroy(entity);
     }
 
-    static entt::entity get_parent(entt::registry &registry,
-                                   entt::entity entity) {
+    static entt::entity
+    get_parent(entt::registry& registry, entt::entity entity) {
 
-        if (auto *parent_component =
+        if (auto* parent_component =
                 registry.try_get<components::Parent>(entity)) {
             return parent_component->parent;
         }
 
         return entt::null;
     }
-    static std::vector<entt::entity> get_children(entt::registry &registry,
-                                                  entt::entity entity) {
-        if (auto *children_component =
+    static std::vector<entt::entity>
+    get_children(entt::registry& registry, entt::entity entity) {
+        if (auto* children_component =
                 registry.try_get<components::Children>(entity)) {
             return children_component->children;
         }

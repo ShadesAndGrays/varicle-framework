@@ -2,53 +2,50 @@
 #include <asset-packer.hpp>
 
 #include <string>
-#include <variant>
 #include <unordered_map>
-
-
+#include <variant>
 
 namespace varicle {
 
-    struct ImageData {
-        void* texture;
-    };
+struct ImageData {
+    void* texture;
+};
 
-    struct SoundData {
-        void* sound;
-    };
+struct SoundData {
+    void* sound;
+};
 
-    struct MusicData {
-        void* music;
-    };
+struct MusicData {
+    void* music;
+};
 
-    struct JsonData {
-        std::string json;
-    };
+struct JsonData {
+    std::string json;
+};
 
-    struct Asset {
-        std::string name;
-        std::variant<ImageData, SoundData, MusicData, JsonData> data;
-    };
+struct Asset {
+    std::string                                             name;
+    std::variant<ImageData, SoundData, MusicData, JsonData> data;
+};
 
+class AssetLoader {
 
-    class AssetLoader{
+  private:
+    AssetReader asset_reader;
 
-        private:
-            AssetReader asset_reader;
+  protected:
+    std::unordered_map<std::string, Asset> assets;
+    virtual void load_all_assets(std::string data_path) = 0;
+    virtual void unload_all_assets()                    = 0;
 
-        protected:
-            std::unordered_map<std::string,Asset> assets;
-            virtual void load_all_assets(std::string data_path) = 0;
-            virtual void unload_all_assets() = 0;
+  public:
+    AssetLoader(std::string asset_data);
+    ~AssetLoader()                               = default;
+    virtual void  load_asset(std::string path)   = 0;
+    virtual void  unload_asset(std::string path) = 0;
+    virtual Asset get_asset(std::string path)    = 0;
+    ;
+    AssetReader get_reader();
+};
 
-        public:
-            AssetLoader(std::string asset_data);
-            ~AssetLoader() = default;
-            virtual void load_asset(std::string path) = 0;
-            virtual void unload_asset(std::string path) = 0;
-            virtual Asset get_asset(std::string path) = 0;;
-            AssetReader get_reader();
-
-    };
-
-}
+} // namespace varicle

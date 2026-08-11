@@ -5,23 +5,30 @@
 
 namespace v = varicle;
 
-v::Tween &v::TweenManager::create_tween(entt::entity p_entity,
-                                        std::uint32_t p_target,
-                                        EngineVariant p_start,
-                                        EngineVariant p_end, float p_duration) {
-    return active_tweens.emplace_back(std::move(Tween{
-        .entity = p_entity,
-        .target = p_target,
-        .start = p_start,
-        .end = p_end,
-        .duration = p_duration,
-    }));
+v::Tween& v::TweenManager::create_tween(
+    entt::entity  p_entity,
+    std::uint32_t p_target,
+    EngineVariant p_start,
+    EngineVariant p_end,
+    float         p_duration
+) {
+    return active_tweens.emplace_back(
+        std::move(
+            Tween{
+                .entity   = p_entity,
+                .target   = p_target,
+                .start    = p_start,
+                .end      = p_end,
+                .duration = p_duration,
+            }
+        )
+    );
 }
 
-void varicle::TweenManager::update(entt::registry &registry, float dt) {
-    const auto &pd = ServiceLocator::get<PropertyDatabase>();
+void varicle::TweenManager::update(entt::registry& registry, float dt) {
+    const auto& pd = ServiceLocator::get<PropertyDatabase>();
 
-    for (Tween &tween : active_tweens) {
+    for (Tween& tween : active_tweens) {
 
         switch (tween.state) {
         case TweenState::PLAYING:
@@ -36,8 +43,9 @@ void varicle::TweenManager::update(entt::registry &registry, float dt) {
                 float progress =
                     std::min(tween.play_time / tween.duration, 1.0f);
                 auto current = VariantOpManager::Execute(
-                    {tween.start,
-                     op::Lerp{tween.end, progress, tween.curve, tween.ease}});
+                    { tween.start,
+                      op::Lerp{ tween.end, progress, tween.curve, tween.ease } }
+                );
 
                 pd.set_value(registry, tween.entity, tween.target, current);
             } else {
@@ -57,6 +65,7 @@ void varicle::TweenManager::update(entt::registry &registry, float dt) {
     }
 
     // Clean up
-    std::erase_if(active_tweens,
-                  [](const Tween &t) { return t.state == TweenState::DEAD; });
+    std::erase_if(active_tweens, [](const Tween& t) {
+        return t.state == TweenState::DEAD;
+    });
 }

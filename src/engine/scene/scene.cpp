@@ -11,7 +11,9 @@ SceneManager::~SceneManager() {
     // delete current_scene;
 }
 
-Scene &SceneManager::get_current_scene() { return *current_scene; }
+Scene& SceneManager::get_current_scene() {
+    return *current_scene;
+}
 
 void SceneManager::process_scene_switch() {
 
@@ -61,5 +63,7 @@ void SceneManager::register_scene(std::string scene_id, SceneFactory factory) {
     scene_registry[std::string(scene_id)] = factory;
 }
 
-void SceneManager::quit() { should_quit = true; }
+void SceneManager::quit() {
+    should_quit = true;
+}
 } // namespace varicle

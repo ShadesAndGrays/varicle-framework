@@ -6,8 +6,8 @@
 #include <box2d/box2d.h>
 
 namespace varicle::physics {
-using BodyID = structures::SlotID;
-using ShapeID = structures::SlotID;
+using BodyID     = structures::SlotID;
+using ShapeID    = structures::SlotID;
 using ColliderID = structures::SlotID;
 
 enum class BodyMode {
@@ -42,25 +42,25 @@ struct BodyData {
 };
 
 struct ShapeData {
-    b2ShapeId native_shape_id = {};
-    shape::ShapeType ShapeType = std::monostate();
+    b2ShapeId        native_shape_id = {};
+    shape::ShapeType ShapeType       = std::monostate();
 };
 
 struct ColliderData {
-    BodyID body_id = {};
+    BodyID                         body_id = {};
     structures::SlotMap<ShapeData> native_shape_ids;
 };
 
 class PhysicsServer2D {
   private:
-    ::Color m_debug_collision_color = ::Color({227, 86, 67, 50});
+    ::Color   m_debug_collision_color = ::Color({ 227, 86, 67, 50 });
     b2WorldId world_id;
-    structures::SlotMap<BodyData> m_bodies;
+    structures::SlotMap<BodyData>     m_bodies;
     structures::SlotMap<ColliderData> m_colliders;
 
-    static constexpr float time_step = 1.0f / 60.0f;
+    static constexpr float time_step      = 1.0f / 60.0f;
     static constexpr float sub_step_count = 4;
-    static constexpr float PPM = 32.0f;
+    static constexpr float PPM            = 32.0f;
 
   public:
     PhysicsServer2D();
@@ -73,11 +73,11 @@ class PhysicsServer2D {
     static constexpr float meters_to_pixels(float m) { return m * PPM; }
 
     static b2Vec2 to_b2(Vec2 px_vec) {
-        return b2Vec2{px_vec.x / PPM, (px_vec.y / PPM) * -1.0f};
+        return b2Vec2{ px_vec.x / PPM, (px_vec.y / PPM) * -1.0f };
     }
 
     static Vec2 to_pixels(b2Vec2 m_vec) {
-        return Vec2{m_vec.x * PPM, m_vec.y * PPM * -1.0f};
+        return Vec2{ m_vec.x * PPM, m_vec.y * PPM * -1.0f };
     }
 
     static b2Rot to_b2_rot(float radians) { return b2MakeRot(-radians); }
@@ -87,24 +87,26 @@ class PhysicsServer2D {
     }
 
     // Collider
-    ColliderID create_collider(BodyID body_id);
-    const ColliderData *get_collider(ColliderID collider_id) const;
-    void destroy_collider(ColliderID collider_id);
+    ColliderID          create_collider(BodyID body_id);
+    const ColliderData* get_collider(ColliderID collider_id) const;
+    void                destroy_collider(ColliderID collider_id);
 
     ShapeID add_shape(ColliderID collider_id, shape::ShapeType shape_type);
-    void remove_shape(ColliderID collider_id, ShapeID shape_id);
+    void    remove_shape(ColliderID collider_id, ShapeID shape_id);
 
     // Body
-    BodyID create_body(BodyMode mode = BodyMode::STATIC,
-                       Vec2 initial_position = {0.0f, 0.0f});
-    const BodyData *get_body(BodyID body_id) const;
-    BodyData *get_body(BodyID body_id);
-    void destroy_body(BodyID body_id);
+    BodyID create_body(
+        BodyMode mode             = BodyMode::STATIC,
+        Vec2     initial_position = { 0.0f, 0.0f }
+    );
+    const BodyData* get_body(BodyID body_id) const;
+    BodyData*       get_body(BodyID body_id);
+    void            destroy_body(BodyID body_id);
 
     void set_position(BodyID body_id, Vec2 position);
     Vec2 get_position(BodyID body_id);
 
-    void set_rotation(BodyID body_id, float rotation);
+    void  set_rotation(BodyID body_id, float rotation);
     float get_rotation(BodyID body_id);
 
     void set_velocity(BodyID body_id, Vec2 velocity);

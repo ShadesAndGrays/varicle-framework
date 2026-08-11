@@ -12,11 +12,11 @@
 using namespace varicle;
 
 // Animation Manager
-void AnimationManager::add_animation(const std::string &animation_name) {
+void AnimationManager::add_animation(const std::string& animation_name) {
     AnimationData data;
     data.animation_name = animation_name;
     const uint32_t hashed_name =
-        entt::hashed_string{animation_name.c_str()}.value();
+        entt::hashed_string{ animation_name.c_str() }.value();
     data.animation_name_hs = hashed_name;
 
     if (!animations.contains(hashed_name)) {
@@ -24,8 +24,10 @@ void AnimationManager::add_animation(const std::string &animation_name) {
     }
 }
 
-void AnimationManager::set_animation_duration(std::uint32_t animation_name_hs,
-                                              float duration) {
+void AnimationManager::set_animation_duration(
+    std::uint32_t animation_name_hs,
+    float         duration
+) {
     animations[animation_name_hs].duration = duration;
 }
 
@@ -45,12 +47,14 @@ void AnimationManager::add_track(std::uint32_t animation_name_hs, Track track) {
 }
 
 // Animation System
-void AnimationSystem::update_animation_system(entt::registry &registry,
-                                              float dt) {
+void AnimationSystem::update_animation_system(
+    entt::registry& registry,
+    float           dt
+) {
 
     const auto animatable = registry.view<Animator>();
 
-    animatable.each([&registry, dt](entt::entity entity, Animator &animator) {
+    animatable.each([&registry, dt](entt::entity entity, Animator& animator) {
         if (!animator.playing)
             return;
 
@@ -70,14 +74,14 @@ void AnimationSystem::update_animation_system(entt::registry &registry,
         animator.play_time = std::clamp(animator.play_time, 0.0f, duration);
 
         const float current_time = animator.reverse
-                                       ? duration - animator.play_time
-                                       : animator.play_time;
+            ? duration - animator.play_time
+            : animator.play_time;
 
-        auto &pd = ServiceLocator::get<PropertyDatabase>();
-        auto anim = AnimationUtil::get_animation(animator);
+        auto& pd   = ServiceLocator::get<PropertyDatabase>();
+        auto  anim = AnimationUtil::get_animation(animator);
 
-        for (const auto &track : anim.tracks) {
-            const auto keys = track.second.keys; // copy of keys
+        for (const auto& track : anim.tracks) {
+            const auto keys   = track.second.keys; // copy of keys
             const auto target = track.second.target;
 
             if (current_time <= 0) { // lower bound
@@ -95,13 +99,17 @@ void AnimationSystem::update_animation_system(entt::registry &registry,
                         continue;
 
                     const float alpha = (b.timeframe - current_time) /
-                                        (b.timeframe - a.timeframe);
+                        (b.timeframe - a.timeframe);
 
-                    auto final_value = VariantOpManager::Execute({
-                        a.value,
-                        op::Lerp{b.value, alpha, track.second.interpolation,
-                                 track.second.mode},
-                    });
+                    auto final_value = VariantOpManager::Execute(
+                        {
+                            a.value,
+                            op::Lerp{ b.value,
+                                      alpha,
+                                      track.second.interpolation,
+                                      track.second.mode },
+                        }
+                    );
 
                     pd.set_value(registry, entity, target, final_value);
                 };
@@ -112,19 +120,22 @@ void AnimationSystem::update_animation_system(entt::registry &registry,
 
 // Animation Utilities
 
-void AnimationUtil::add_animator_component(entt ::registry &registry,
-                                           entt::entity e,
-                                           const Animator &animator) {
+void AnimationUtil::add_animator_component(
+    entt ::registry& registry,
+    entt::entity     e,
+    const Animator&  animator
+) {
     registry.emplace<Animator>(e) = animator;
 }
 
-AnimationData AnimationUtil::get_animation(Animator &animator) {
+AnimationData AnimationUtil::get_animation(Animator& animator) {
     auto anim = ServiceLocator::get<AnimationManager>().get_animation(
-        animator.animation_name);
+        animator.animation_name
+    );
     return anim;
 }
 
-float AnimationUtil::get_animation_duration(Animator &animator) {
+float AnimationUtil::get_animation_duration(Animator& animator) {
     if (ServiceLocator::has<AnimationManager>()) {
         auto animation_data = get_animation(animator);
         return animation_data.duration;
@@ -133,24 +144,26 @@ float AnimationUtil::get_animation_duration(Animator &animator) {
     }
 }
 
-float AnimationUtil::get_animation_duration(AnimationData &animation) {
+float AnimationUtil::get_animation_duration(AnimationData& animation) {
     return animation.duration;
 }
 
-void AnimationUtil::play_animation(Animator &animator, bool reset) {
+void AnimationUtil::play_animation(Animator& animator, bool reset) {
     animator.playing = true;
     if (reset)
         animator.play_time = 0.0f;
 }
 
-void AnimationUtil::play_animation(Animator &animator,
-                                   std::uint32_t animation_name_hs,
-                                   bool reset) {
+void AnimationUtil::play_animation(
+    Animator&     animator,
+    std::uint32_t animation_name_hs,
+    bool          reset
+) {
     animator.animation_name = animation_name_hs;
     play_animation(animator, reset);
 }
 
-void AnimationUtil::stop_animation(Animator &animator, bool reset) {
+void AnimationUtil::stop_animation(Animator& animator, bool reset) {
     animator.playing = false;
     if (reset) {
         animator.play_time = 0.0f;

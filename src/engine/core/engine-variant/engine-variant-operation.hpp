@@ -28,7 +28,7 @@ struct Mul {
 };
 struct Lerp {
     EngineVariant value;
-    float alpha;
+    float         alpha;
 
     // Defaults to linear
     CurveFunc curve = Curve::linear;
@@ -40,34 +40,38 @@ struct Lerp {
 using Operation = std::variant<op::Assign, op::Add, op::Mul, op::Lerp>;
 
 struct VariantOpRequest {
-    EngineVariant source; // The variable we want to change
-    Operation operation;  // How we want to change it
+    EngineVariant source;    // The variable we want to change
+    Operation     operation; // How we want to change it
 
-    static VariantOpRequest assign(const EngineVariant &source,
-                                   const EngineVariant &val) {
-        return {source, op::Assign{val}};
+    static VariantOpRequest
+    assign(const EngineVariant& source, const EngineVariant& val) {
+        return { source, op::Assign{ val } };
     };
 
-    static VariantOpRequest add(const EngineVariant &source,
-                                const EngineVariant &val) {
-        return {source, op::Add{val}};
+    static VariantOpRequest
+    add(const EngineVariant& source, const EngineVariant& val) {
+        return { source, op::Add{ val } };
     };
 
-    static VariantOpRequest mul(const EngineVariant &source,
-                                const EngineVariant &val) {
-        return {source, op::Mul{val}};
+    static VariantOpRequest
+    mul(const EngineVariant& source, const EngineVariant& val) {
+        return { source, op::Mul{ val } };
     };
 
-    static VariantOpRequest lerp(const EngineVariant &source,
-                                 const EngineVariant &target_val, float alpha,
-                                 CurveFunc curve = Curve::linear,
-                                 EaseMode ease = EaseMode::In) {
-        return {source, op::Lerp{
-                            target_val,
-                            alpha,
-                            curve,
-                            ease,
-                        }};
+    static VariantOpRequest lerp(
+        const EngineVariant& source,
+        const EngineVariant& target_val,
+        float                alpha,
+        CurveFunc            curve = Curve::linear,
+        EaseMode             ease  = EaseMode::In
+    ) {
+        return { source,
+                 op::Lerp{
+                     target_val,
+                     alpha,
+                     curve,
+                     ease,
+                 } };
     };
 };
 
@@ -75,38 +79,44 @@ class VariantOpManager {
 
   public:
     VariantOpManager() {}
-    static EngineVariant Execute(const VariantOpRequest &req) {
+    static EngineVariant Execute(const VariantOpRequest& req) {
         EngineVariant result;
 
         std::visit(
             Overloaded{
-                [&](const op::Assign &op) { result = op.value; },
-                [&](const op::Add &op) {
+                [&](const op::Assign& op) { result = op.value; },
+                [&](const op::Add& op) {
                     result.data = std::visit(
-                        [](const auto &a,
-                           const auto &b) -> EngineVariant::InternalVariant {
+                        [](const auto& a,
+                           const auto& b) -> EngineVariant::InternalVariant {
                             if constexpr (requires { a + b; })
                                 return a + b;
                             return a;
                         },
-                        req.source.data, op.value.data);
+                        req.source.data,
+                        op.value.data
+                    );
                 },
-                [&](const op::Mul &op) {
+                [&](const op::Mul& op) {
                     result.data = std::visit(
-                        [](const auto &a,
-                           const auto &b) -> EngineVariant::InternalVariant {
+                        [](const auto& a,
+                           const auto& b) -> EngineVariant::InternalVariant {
                             if constexpr (requires { a * b; })
                                 return a * b;
                             return a;
                         },
-                        req.source.data, op.value.data);
+                        req.source.data,
+                        op.value.data
+                    );
                 },
-                [&](const op::Lerp &op) {
-                    const float eased_t = LerpUtil::ease(op.alpha,op.curve,op.ease);
+                [&](const op::Lerp& op) {
+                    const float eased_t =
+                        LerpUtil::ease(op.alpha, op.curve, op.ease);
 
                     result.data = std::visit(
-                        [eased_t](const auto &a, const auto &b)
-                            -> EngineVariant::InternalVariant {
+                        [eased_t](
+                            const auto& a, const auto& b
+                        ) -> EngineVariant::InternalVariant {
                             using T = std::decay_t<decltype(a)>;
                             using U = std::decay_t<decltype(b)>;
 
@@ -115,17 +125,21 @@ class VariantOpManager {
                                                   LerpUtil::lerp(a, b, eased_t);
                                               }) {
                                     return LerpUtil::lerp(a, b, eased_t);
-                                } else if constexpr (std::is_same_v<
-                                                         T, std::string>) {
+                                } else if constexpr (
+                                    std::is_same_v<T, std::string>
+                                ) {
                                     return eased_t >= 0.5 ? b : a;
                                 }
                             }
                             return a;
                         },
-                        req.source.data, op.value.data);
+                        req.source.data,
+                        op.value.data
+                    );
                 },
             },
-            req.operation);
+            req.operation
+        );
 
         return result;
     }

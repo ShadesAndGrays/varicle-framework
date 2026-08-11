@@ -7,8 +7,8 @@ using namespace varicle::shape;
 
 PhysicsServer2D::PhysicsServer2D() {
     b2WorldDef worldDef = b2DefaultWorldDef();
-    worldDef.gravity = (b2Vec2){0.0f, -10.0f};
-    world_id = b2CreateWorld(&worldDef);
+    worldDef.gravity    = (b2Vec2){ 0.0f, -10.0f };
+    world_id            = b2CreateWorld(&worldDef);
 }
 varicle::physics::PhysicsServer2D::~PhysicsServer2D() {
     b2DestroyWorld(world_id);
@@ -16,45 +16,57 @@ varicle::physics::PhysicsServer2D::~PhysicsServer2D() {
 
 void varicle::physics::PhysicsServer2D::debug_draw_colliders() {
 
-    const auto &colliders = m_colliders.get_data();
+    const auto& colliders = m_colliders.get_data();
 
-    for (const auto &collider : colliders) {
-        const auto &shapes = collider.native_shape_ids.get_data();
-        const auto pos = get_position(collider.body_id);
-        const auto rot = get_rotation(collider.body_id);
-        for (const auto &shape : shapes) {
+    for (const auto& collider : colliders) {
+        const auto& shapes = collider.native_shape_ids.get_data();
+        const auto  pos    = get_position(collider.body_id);
+        const auto  rot    = get_rotation(collider.body_id);
+        for (const auto& shape : shapes) {
             std::visit(
-                [&](const auto &shape) {
+                [&](const auto& shape) {
                     using T = std::decay_t<decltype(shape)>;
                     if constexpr (std::is_same_v<T, CircleShape>) {
-                        DrawCircle(static_cast<int>(pos.x),
-                                   static_cast<int>(pos.y), shape.radius,
-                                   m_debug_collision_color);
+                        DrawCircle(
+                            static_cast<int>(pos.x),
+                            static_cast<int>(pos.y),
+                            shape.radius,
+                            m_debug_collision_color
+                        );
                     } else if constexpr (std::is_same_v<T, RectangleShape>) {
 
                         DrawRectanglePro(
-                            {pos.x, pos.y, shape.half_extents.x * 2,
-                             shape.half_extents.y * 2},
-                            Vector2{shape.half_extents.x, shape.half_extents.y},
-                            rot * RAD2DEG, m_debug_collision_color
+                            { pos.x,
+                              pos.y,
+                              shape.half_extents.x * 2,
+                              shape.half_extents.y * 2 },
+                            Vector2{ shape.half_extents.x,
+                                     shape.half_extents.y },
+                            rot * RAD2DEG,
+                            m_debug_collision_color
 
                         );
                     } else {
-                        DrawCircle(static_cast<int>(pos.x),
-                                   static_cast<int>(pos.y), 2, ::RED);
+                        DrawCircle(
+                            static_cast<int>(pos.x),
+                            static_cast<int>(pos.y),
+                            2,
+                            ::RED
+                        );
                     };
                 },
-                shape.ShapeType);
+                shape.ShapeType
+            );
         }
     }
 }
 
 // Collider
 ColliderID PhysicsServer2D::create_collider(BodyID body_id) {
-    const auto collider = m_colliders.emplace({body_id});
+    const auto collider = m_colliders.emplace({ body_id });
     return collider;
 }
-const ColliderData *
+const ColliderData*
 PhysicsServer2D::get_collider(ColliderID collider_id) const {
     return m_colliders.get(collider_id);
 }
@@ -63,15 +75,15 @@ void PhysicsServer2D::destroy_collider(ColliderID collider_id) {
     m_colliders.remove(collider_id);
 }
 
-ShapeID PhysicsServer2D::add_shape(ColliderID collider_id,
-                                   ShapeType shape_type) {
-    auto collider = m_colliders.get(collider_id);
-    auto const body_data = m_bodies.get(collider->body_id);
+ShapeID
+PhysicsServer2D::add_shape(ColliderID collider_id, ShapeType shape_type) {
+    auto       collider       = m_colliders.get(collider_id);
+    auto const body_data      = m_bodies.get(collider->body_id);
     const auto native_body_id = body_data->native_body_id;
 
     b2ShapeDef shapeDef = b2DefaultShapeDef();
     // shapeDef.density = 10.0f;
-    shapeDef.density = 10.0f;
+    shapeDef.density           = 10.0f;
     shapeDef.material.friction = 0.7f;
     if (body_data->mode == BodyMode::ZONE) {
         shapeDef.isSensor = true;
@@ -79,26 +91,28 @@ ShapeID PhysicsServer2D::add_shape(ColliderID collider_id,
     b2ShapeId native_shape_id;
 
     std::visit(
-        [native_body_id, &native_shape_id, &shapeDef](const auto &s) {
+        [native_body_id, &native_shape_id, &shapeDef](const auto& s) {
             using T = std::decay_t<decltype(s)>;
 
             if constexpr (std::is_same_v<T, CircleShape>) {
                 b2Circle circle;
-                circle.center = {.0f, .0f};
+                circle.center = { .0f, .0f };
                 circle.radius = s.radius;
                 native_shape_id =
                     b2CreateCircleShape(native_body_id, &shapeDef, &circle);
             } else if constexpr (std::is_same_v<T, RectangleShape>) {
-                const auto x = pixels_to_meters(s.half_extents.x);
-                const auto y = pixels_to_meters(s.half_extents.y);
-                b2Polygon box_polygon = b2MakeBox(x, y);
-                native_shape_id = b2CreatePolygonShape(native_body_id,
-                                                       &shapeDef, &box_polygon);
+                const auto x           = pixels_to_meters(s.half_extents.x);
+                const auto y           = pixels_to_meters(s.half_extents.y);
+                b2Polygon  box_polygon = b2MakeBox(x, y);
+                native_shape_id        = b2CreatePolygonShape(
+                    native_body_id, &shapeDef, &box_polygon
+                );
             }
         },
-        shape_type);
+        shape_type
+    );
 
-    return collider->native_shape_ids.emplace({native_shape_id, shape_type});
+    return collider->native_shape_ids.emplace({ native_shape_id, shape_type });
 }
 
 void PhysicsServer2D::remove_shape(ColliderID collider_id, ShapeID shape_id) {
@@ -134,19 +148,19 @@ BodyID PhysicsServer2D::create_body(BodyMode mode, Vec2 position) {
     const b2BodyId native_body_id = b2CreateBody(world_id, &bodyDef);
 
     BodyData body;
-    body.mode = mode;
-    body.native_body_id = native_body_id;
+    body.mode            = mode;
+    body.native_body_id  = native_body_id;
     const BodyID body_id = m_bodies.emplace(body);
 
-    const ColliderID collier_id = create_collider(body_id);
+    const ColliderID collier_id    = create_collider(body_id);
     get_body(body_id)->collider_id = collier_id;
     return body_id;
 }
 
-BodyData *PhysicsServer2D::get_body(BodyID body_id) {
+BodyData* PhysicsServer2D::get_body(BodyID body_id) {
     return m_bodies.get(body_id);
 }
-const BodyData *PhysicsServer2D::get_body(BodyID body_id) const {
+const BodyData* PhysicsServer2D::get_body(BodyID body_id) const {
     return m_bodies.get(body_id);
 }
 
@@ -178,7 +192,7 @@ void PhysicsServer2D::set_rotation(BodyID body_id, float rotation) {
 }
 float PhysicsServer2D::get_rotation(BodyID body_id) {
     const auto body = get_body(body_id);
-    auto rot = b2Body_GetRotation(body->native_body_id);
+    auto       rot  = b2Body_GetRotation(body->native_body_id);
     return to_rad(rot);
 }
 

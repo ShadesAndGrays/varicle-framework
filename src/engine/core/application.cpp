@@ -22,8 +22,8 @@ namespace varicle {
 
 void game_loop(void) {
 
-    auto &scene_manager = ServiceLocator::get<SceneManager>();
-    auto &physics_sever = ServiceLocator::get<physics::PhysicsServer2D>();
+    auto& scene_manager = ServiceLocator::get<SceneManager>();
+    auto& physics_sever = ServiceLocator::get<physics::PhysicsServer2D>();
 
     float dt = GetFrameTime();
 
@@ -45,7 +45,6 @@ void game_loop(void) {
     rlImGuiEnd();
 
     EndDrawing();
-
 
     scene_manager.process_scene_switch();
 }
@@ -70,7 +69,7 @@ void Application::run() {
     // 3. Call game-specific startup (where the game creates its first scene)
     on_init();
 
-    auto &scene_manager = ServiceLocator::get<SceneManager>();
+    auto& scene_manager = ServiceLocator::get<SceneManager>();
 
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(game_loop, 0, 1);
@@ -94,6 +93,8 @@ void Application::change_scene(std::string scene_id) {
     ServiceLocator::get<SceneManager>().switch_to_scene(scene_id);
 }
 
-void Application::quit() { ServiceLocator::get<SceneManager>().quit(); }
+void Application::quit() {
+    ServiceLocator::get<SceneManager>().quit();
+}
 
 } // namespace varicle
