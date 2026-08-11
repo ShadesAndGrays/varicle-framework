@@ -28,8 +28,8 @@ void game_loop(void) {
     float dt = GetFrameTime();
 
     // Update
-    scene_manager.update(dt);
     physics_sever.step(dt);
+    scene_manager.update(dt);
 
     // Draw
     BeginDrawing();
@@ -37,11 +37,15 @@ void game_loop(void) {
 
     scene_manager.render();
 
+    if (physics_sever.debug)
+        physics_sever.debug_draw_colliders();
+
     rlImGuiBegin();
     scene_manager.ui();
     rlImGuiEnd();
 
     EndDrawing();
+
 
     scene_manager.process_scene_switch();
 }

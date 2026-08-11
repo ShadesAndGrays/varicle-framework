@@ -14,6 +14,7 @@ namespace varicle {
 
 class PhysicsSystem {
   public:
+      // Updates LocalTransform Should be called before transform sync
     static void update_physics_system(entt::registry &registry, float dt) {
         using namespace components;
 
@@ -23,8 +24,10 @@ class PhysicsSystem {
             [dt](const Body2D &body_component, LocalTransform2D &transform) {
                 auto &physics_server_2d =
                     ServiceLocator::get<physics::PhysicsServer2D>();
-                auto body = physics_server_2d.get_body(body_component.body_id);
-                transform.position = body->position;
+                transform.position =
+                    physics_server_2d.get_position(body_component.body_id);
+                transform.rotation =
+                    physics_server_2d.get_rotation(body_component.body_id);
             });
     }
 };
@@ -53,20 +56,30 @@ class PhysicsUtil {
                 registry.try_get<components::Body2D>(e)) {
             auto &physics_server_2d =
                 ServiceLocator::get<physics::PhysicsServer2D>();
-            physics_server_2d.get_body(body_component->body_id)->velocity =
-                velocity;
+            physics_server_2d.set_velocity(body_component->body_id, velocity);
         }
     }
+
     static void set_position(entt::registry &registry, entt::entity e,
                              Vec2 position) {
         if (const auto body_component =
                 registry.try_get<components::Body2D>(e)) {
             auto &physics_server_2d =
                 ServiceLocator::get<physics::PhysicsServer2D>();
-            physics_server_2d.get_body(body_component->body_id)->position =
-                position;
+            physics_server_2d.set_position(body_component->body_id, position);
         }
     }
+
+    static void set_rotation(entt::registry &registry, entt::entity e,
+                             float rotation) {
+        if (const auto body_component =
+                registry.try_get<components::Body2D>(e)) {
+            auto &physics_server_2d =
+                ServiceLocator::get<physics::PhysicsServer2D>();
+            physics_server_2d.set_rotation(body_component->body_id, rotation);
+        }
+    }
+
     static void add_static_body_component(entt::registry &registry,
                                           entt::entity e) {
         add_body_component(registry, e, physics::BodyMode::STATIC);
@@ -82,15 +95,40 @@ class PhysicsUtil {
         add_body_component(registry, e, physics::BodyMode::DYNAMIC);
     }
 
-    static void add_collider_to_body(entt::registry &registry, entt::entity e,
-                                     float radius) {
+    static void add_zone_body_component(entt::registry &registry,
+                                           entt::entity e) {
+        add_body_component(registry, e, physics::BodyMode::ZONE);
+    }
+
+    static void add_rect_collider(entt::registry &registry, entt::entity e,
+                                  Vec2 half_extents) {
+        auto &physics_server_2d =
+            ServiceLocator::get<physics::PhysicsServer2D>();
+        if (const auto body_component =
+                registry.try_get<components::Body2D>(e)) {
+            const auto body =
+                physics_server_2d.get_body(body_component->body_id);
+            physics_server_2d.add_shape(body->collider_id,
+                                        shape::RectangleShape{half_extents});
+
+        } else {
+            std::cout
+                << "Warning: Cannot add collider to entity without body2D\n";
+        }
+    }
+
+    static void add_circle_collider(entt::registry &registry, entt::entity e,
+                                    float radius) {
         auto &physics_server_2d =
             ServiceLocator::get<physics::PhysicsServer2D>();
 
-        if (const auto body = registry.try_get<components::Body2D>(e)) {
-            auto shape_id =
-                physics_server_2d.create_shape(shape::CircleShape{radius});
-            physics_server_2d.create_collider(body->body_id, shape_id, {0, 0});
+        if (const auto body_component =
+                registry.try_get<components::Body2D>(e)) {
+
+            const auto body =
+                physics_server_2d.get_body(body_component->body_id);
+            physics_server_2d.add_shape(body->collider_id,
+                                        shape::CircleShape{radius});
         }
     }
 };

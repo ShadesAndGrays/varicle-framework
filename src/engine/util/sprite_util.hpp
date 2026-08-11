@@ -5,9 +5,6 @@
 
 namespace varicle {
 
-inline ::Color to_raylib_color(const varicle::Color &c) {
-    return ::Color{c.r, c.g, c.b, c.a};
-}
 
 inline Rectangle
 get_source_rect(const varicle::components::AnimatedSprite &animated_sprite) {

@@ -34,6 +34,7 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # ignore rayblib builds
 add_subdirectory(vendor/raylib)
 set(BUILD_EXAMPLES ${VARICLE_BUILD_EXAMPLES} CACHE BOOL "" FORCE) # retrieve flag
 add_subdirectory(vendor/asset-packer)
+add_subdirectory(vendor/box2d)
 
 file(GLOB IMGUI_SOURCES "vendor/imgui/*.cpp")
 file(GLOB IMGUI_HEADERS "vendor/imgui/*.h")
@@ -67,6 +68,7 @@ target_include_directories(${PROJECT_NAME}_lib PUBLIC
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC
     AssetPacker::assetpacker
     raylib
+    box2d
 )
 
 # ------------------------------------------------------------------------------

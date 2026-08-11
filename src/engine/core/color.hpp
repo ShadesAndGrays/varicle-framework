@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <raylib.h>
 
 namespace varicle {
 struct Color {
@@ -28,6 +29,10 @@ class ColorUtil {
         };
         return {lerp_u8(s.r, e.r, a), lerp_u8(s.g, e.g, a),
                 lerp_u8(s.b, e.b, a), lerp_u8(s.a, e.a, a)};
+    }
+
+    static ::Color to_raylib_color(const varicle::Color &c) {
+        return ::Color{c.r, c.g, c.b, c.a};
     }
 };
 

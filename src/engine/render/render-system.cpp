@@ -1,5 +1,6 @@
 #include "engine/render/render-system.hpp"
 #include "engine/asset/raylib-asset.hpp"
+#include "engine/core/color.hpp"
 #include "engine/core/service-locator.hpp"
 #include "engine/ecs/components.hpp"
 #include "engine/util/sprite_util.hpp"
@@ -35,7 +36,7 @@ void varicle::RenderSystem::update_render_system(entt::registry &registry) {
         // Check for color
         if (const components::Tint *tint_component =
                 registry.try_get<components::Tint>(entity)) {
-            raylibTint = to_raylib_color(tint_component->tint);
+            raylibTint = ColorUtil::to_raylib_color(tint_component->tint);
         }
 
         const Rectangle dest_rect = Rectangle{
