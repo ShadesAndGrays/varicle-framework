@@ -24,6 +24,8 @@
 #include "engine/util/slot-map.hpp"
 #include "engine/util/sprite_util.hpp"
 
+#include "engine/ui/ui.hpp"
+
 #include <box2d/box2d.h>
 #include <entt/entt.hpp>
 #include <imgui.h>

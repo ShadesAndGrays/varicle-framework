@@ -1,0 +1,27 @@
+{
+  "type": "UINode",
+  "name": "HUD_Root",
+  "anchor": "FullStretch",
+  "offset": [0, 0, 0, 0],
+
+  "children": [
+    {
+      "type": "UIPanel",
+      "name": "HealthPanel",
+      "anchor": "FullStretch",
+      "pivot": [0.0, 0.0],
+      "offset": [0, 0, 0, 0],
+      "bg_color": [20, 20, 40, 255]
+    },
+    {
+      "type": "UIButton",
+      "name": "PauseButton",
+      "text": "Click Me",
+      "anchor": "Center",
+      "pivot": [0.5, 0.5],
+      "offset": [0, 0, 140, 50],
+      "event_id": "on_pause_clicked"
+    }
+  ]
+}
+
