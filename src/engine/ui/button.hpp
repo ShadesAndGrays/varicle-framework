@@ -8,7 +8,12 @@ class UIButton : public UINode {
   public:
     std::string           text;
     std::function<void()> on_click;
-    varicle::Color        bg_color = { 40, 40, 40, 200 };
+    varicle::Color        idle_bg_color  = { 150, 150, 150, 255 };
+    varicle::Color        idle_fg_color  = { 255, 255, 255, 255 };
+    varicle::Color        hover_bg_color = { 200, 200, 230, 255 };
+    varicle::Color        hover_fg_color = { 255, 255, 255, 255 };
+    varicle::Color        click_bg_color = { 200, 200, 255, 255 };
+    varicle::Color        click_fg_color = { 255, 255, 255, 255 };
 
   private:
     bool m_hovered = false;
@@ -48,16 +53,30 @@ class UIButton : public UINode {
 
   protected:
     void draw_self() override {
-        ::Color col = m_hovered ? (m_pressed ? ::Color{ 120, 120, 120, 255 }
-                                             : ::Color{ 90, 90, 90, 255 })
-                                : ::Color{ 60, 60, 60, 255 };
+        varicle::Color bg_col = {};
+        varicle::Color fg_col = {};
+
+        if (m_hovered) {
+            if (m_pressed) {
+                bg_col = click_bg_color;
+                fg_col = click_fg_color;
+
+            } else {
+                bg_col = hover_bg_color;
+                fg_col = hover_fg_color;
+            }
+
+        } else {
+            bg_col = idle_bg_color;
+            fg_col = idle_fg_color;
+        }
 
         auto rec = Rectangle{ m_global_rect.x,
                               m_global_rect.y,
                               m_global_rect.width,
                               m_global_rect.height };
-        DrawRectangleRec(rec, col);
-        DrawRectangleLinesEx(rec, 1.0f, ::BLACK);
+        DrawRectangleRec(rec, ColorUtil::to_raylib_color(bg_col));
+        DrawRectangleLinesEx(rec, 1.0f, ColorUtil::to_raylib_color(fg_col));
 
         // Draw centered text
         int font_size  = 18;

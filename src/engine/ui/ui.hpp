@@ -7,6 +7,6 @@
 #include "node.hpp"
 #include "panel.hpp"
 #include "rect.hpp"
-#include "ui-loader.hpp"
+#include "ui-factory.hpp"
 
 // IWYU pragma: end_exports

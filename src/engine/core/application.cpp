@@ -3,6 +3,7 @@
 #include "engine/core/application.hpp"
 #include "engine/asset/raylib-asset.hpp"
 #include "engine/core/engine-variant/engine-variant-property.hpp"
+#include "engine/core/event-bus.hpp"
 #include "engine/core/service-locator.hpp"
 
 #include "engine/ecs/animation.hpp"
@@ -24,12 +25,14 @@ void game_loop(void) {
 
     auto& scene_manager = ServiceLocator::get<SceneManager>();
     auto& physics_sever = ServiceLocator::get<physics::PhysicsServer2D>();
+    auto&  event_bus = ServiceLocator::get<event::EventBus>();
 
     float dt = GetFrameTime();
 
     // Update
     physics_sever.step(dt);
     scene_manager.update(dt);
+    event_bus.flush();
 
     // Draw
     BeginDrawing();
@@ -62,6 +65,7 @@ void Application::run() {
     ServiceLocator::provide(std::make_unique<RaylibAssetLoader>());
     ServiceLocator::provide(std::make_unique<SceneManager>());
     ServiceLocator::provide(std::make_unique<AnimationManager>());
+    ServiceLocator::provide(std::make_unique<event::EventBus>());
     ServiceLocator::provide(std::make_unique<physics::PhysicsServer2D>());
 
     register_all_component_properties(ServiceLocator::get<PropertyDatabase>());

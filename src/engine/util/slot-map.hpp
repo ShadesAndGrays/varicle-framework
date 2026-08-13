@@ -86,40 +86,44 @@ template <typename T> class SlotMap {
         assert(ptr != nullptr && "Invalid ID Passed to SlotMap::operator[]");
         return *ptr;
     }
-    const T& operator[](const T& id) const {
+
+    const T& operator[](SlotID id) const {
         const T* ptr = get(id);
         assert(ptr != nullptr && "Invalid ID Passed to SlotMap::operator[]");
         return *ptr;
     }
 
-    SlotID emplace(const T& val) {
-        SlotID new_id{};
+    template <typename... Args> SlotID emplace(Args&&... args) {
+        SlotID   new_id{};
+        uint32_t slot_index = 0;
         if (free_list.empty()) {
-            new_id.index      = slots.size();
+            slot_index        = static_cast<uint32_t>(slots.size());
+            new_id.index      = slot_index;
             new_id.generation = 0;
+
             slots.emplace_back(
                 Slot{ .dense_index = static_cast<uint32_t>(data.size()),
                       .generation  = 0 }
             );
-            data.emplace_back(val);
-            erase.emplace_back(new_id.index);
-        } else {
-            const auto free_slot = free_list.back();
 
+        } else {
+            slot_index = free_list.back();
             free_list.pop_back();
-            Slot& slot        = slots[free_slot];
-            new_id.index      = free_slot;
+            Slot& slot        = slots[slot_index];
+            new_id.index      = slot_index;
             new_id.generation = slot.generation;
             slot.dense_index  = data.size();
-
-            data.emplace_back(val);
-            erase.emplace_back(free_slot);
         }
+
+        data.emplace_back(std::forward<Args>(args)...);
+        erase.emplace_back(slot_index);
 
         return new_id;
     }
 
-    void remove(const SlotID& id) {
+    SlotID push(T val) { return emplace(std::move(val)); }
+
+    bool remove(const SlotID& id) {
         if (get(id)) {
             Slot&      slot = slots[id.index]; // Get the target slot
             const auto slot_to_update =
@@ -145,7 +149,9 @@ template <typename T> class SlotMap {
                 std::numeric_limits<uint32_t>()
                     .max(); // and we can do this just readability. The data has
                             // been removed
+            return true;
         }
+        return false;
     }
 
     void print() const {

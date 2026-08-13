@@ -190,3 +190,6 @@ void varicle::register_all_component_properties(PropertyDatabase& db) {
     //                      PropertyRegistry::bind_field(PropertyID::Children,
     //                                                   &Children::children));
 }
+
+// TODO: implement property system for ui as well
+void varicle::register_all_ui_properties(PropertyDatabase& db) {}

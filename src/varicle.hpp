@@ -7,6 +7,7 @@
 #include "engine/core/application.hpp"
 #include "engine/core/color.hpp"
 #include "engine/core/constants.hpp"
+#include "engine/core/event-bus.hpp"
 #include "engine/core/lerp.hpp"
 #include "engine/core/service-locator.hpp"
 

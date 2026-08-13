@@ -1,5 +1,7 @@
 #include "physics.hpp"
 #include "box2d/types.h"
+#include "engine/core/event-bus.hpp"
+#include "engine/core/service-locator.hpp"
 #include "raylib.h"
 
 using namespace varicle::physics;
@@ -8,10 +10,10 @@ using namespace varicle::shape;
 PhysicsServer2D::PhysicsServer2D() {
     b2WorldDef worldDef = b2DefaultWorldDef();
     worldDef.gravity    = (b2Vec2){ 0.0f, -10.0f };
-    world_id            = b2CreateWorld(&worldDef);
+    m_world_id          = b2CreateWorld(&worldDef);
 }
 varicle::physics::PhysicsServer2D::~PhysicsServer2D() {
-    b2DestroyWorld(world_id);
+    b2DestroyWorld(m_world_id);
 };
 
 void varicle::physics::PhysicsServer2D::debug_draw_colliders() {
@@ -63,7 +65,7 @@ void varicle::physics::PhysicsServer2D::debug_draw_colliders() {
 
 // Collider
 ColliderID PhysicsServer2D::create_collider(BodyID body_id) {
-    const auto collider = m_colliders.emplace({ body_id });
+    const auto collider = m_colliders.push({ body_id });
     return collider;
 }
 const ColliderData*
@@ -83,11 +85,14 @@ PhysicsServer2D::add_shape(ColliderID collider_id, ShapeType shape_type) {
 
     b2ShapeDef shapeDef = b2DefaultShapeDef();
     // shapeDef.density = 10.0f;
-    shapeDef.density           = 10.0f;
-    shapeDef.material.friction = 0.7f;
+    shapeDef.density            = 10.0f;
+    shapeDef.material.friction  = 0.7f;
+    shapeDef.enableSensorEvents = true;
+
     if (body_data->mode == BodyMode::ZONE) {
         shapeDef.isSensor = true;
     }
+
     b2ShapeId native_shape_id;
 
     std::visit(
@@ -97,7 +102,7 @@ PhysicsServer2D::add_shape(ColliderID collider_id, ShapeType shape_type) {
             if constexpr (std::is_same_v<T, CircleShape>) {
                 b2Circle circle;
                 circle.center = { .0f, .0f };
-                circle.radius = s.radius;
+                circle.radius = pixels_to_meters(s.radius);
                 native_shape_id =
                     b2CreateCircleShape(native_body_id, &shapeDef, &circle);
             } else if constexpr (std::is_same_v<T, RectangleShape>) {
@@ -112,7 +117,7 @@ PhysicsServer2D::add_shape(ColliderID collider_id, ShapeType shape_type) {
         shape_type
     );
 
-    return collider->native_shape_ids.emplace({ native_shape_id, shape_type });
+    return collider->native_shape_ids.push({ native_shape_id, shape_type });
 }
 
 void PhysicsServer2D::remove_shape(ColliderID collider_id, ShapeID shape_id) {
@@ -120,7 +125,7 @@ void PhysicsServer2D::remove_shape(ColliderID collider_id, ShapeID shape_id) {
     if (auto collider = m_colliders.get(collider_id)) {
         const auto shape_data = collider->native_shape_ids.get(shape_id);
         b2DestroyShape(shape_data->native_shape_id, false);
-        return collider->native_shape_ids.remove(shape_id);
+        collider->native_shape_ids.remove(shape_id);
     }
 }
 
@@ -145,7 +150,7 @@ BodyID PhysicsServer2D::create_body(BodyMode mode, Vec2 position) {
 
     bodyDef.position = to_b2(position);
 
-    const b2BodyId native_body_id = b2CreateBody(world_id, &bodyDef);
+    const b2BodyId native_body_id = b2CreateBody(m_world_id, &bodyDef);
 
     BodyData body;
     body.mode            = mode;
@@ -215,5 +220,29 @@ varicle::Vec2 PhysicsServer2D::get_velocity(BodyID body_id) {
 // Processing
 
 void PhysicsServer2D::step(float dt) {
-    b2World_Step(world_id, time_step, sub_step_count);
+    b2World_Step(m_world_id, time_step, sub_step_count);
+    handle_sensor_events();
+}
+
+void PhysicsServer2D::handle_sensor_events() {
+    b2SensorEvents sensorEvents = b2World_GetSensorEvents(m_world_id);
+
+    for (int i = 0; i < sensorEvents.beginCount; ++i) {
+        b2SensorBeginTouchEvent* beginTouch = sensorEvents.beginEvents + i;
+        std::cout << "in";
+
+        if (void* myUserData =
+                b2Shape_GetUserData(beginTouch->visitorShapeId)) {
+            ServiceLocator::get<event::EventBus>().publish<EventBodyEntered>({
+                });
+        }
+
+        // process begin event
+    }
+
+    for (int i = 0; i < sensorEvents.beginCount; ++i) {
+        b2SensorBeginTouchEvent* beginTouch = sensorEvents.beginEvents + i;
+        void* myUserData = b2Shape_GetUserData(beginTouch->visitorShapeId);
+        std::cout << "out";
+    }
 }

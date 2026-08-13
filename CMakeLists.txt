@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 # ------------------------------------------------------------------------------
 # 1. Platform & Dist Paths
@@ -178,8 +179,9 @@ if (BUILD_EXAMPLES)
     # add_subdirectory(examples/keyframe-animation)
     # add_subdirectory(examples/engine-variant)
     # add_subdirectory(examples/tweening)
-    # add_subdirectory(examples/physics-server-test)
-    add_subdirectory(examples/basic-ui)
+    add_subdirectory(examples/physics-server-test)
+    add_subdirectory(examples/event-bus)
+    # add_subdirectory(examples/basic-ui)
 
 else()
     message(STATUS "Building Examples: Disabled")

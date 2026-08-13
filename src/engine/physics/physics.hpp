@@ -2,7 +2,6 @@
 
 #include "engine/core/engine-variant/engine-variant.hpp"
 #include "engine/util/slot-map.hpp"
-
 #include <box2d/box2d.h>
 
 namespace varicle::physics {
@@ -15,6 +14,10 @@ enum class BodyMode {
     KINEMATIC, // Program and Velocity based
     DYNAMIC,   // Simulated
     ZONE       // Detection (no collision)
+};
+
+struct EventBodyEntered {
+    BodyID body_id;
 };
 
 } // namespace varicle::physics
@@ -54,18 +57,24 @@ struct ColliderData {
 class PhysicsServer2D {
   private:
     ::Color   m_debug_collision_color = ::Color({ 227, 86, 67, 50 });
-    b2WorldId world_id;
+    b2WorldId m_world_id;
     structures::SlotMap<BodyData>     m_bodies;
     structures::SlotMap<ColliderData> m_colliders;
+    structures::SlotMap<ColliderData> m_body_to_entity;
 
     static constexpr float time_step      = 1.0f / 60.0f;
     static constexpr float sub_step_count = 4;
     static constexpr float PPM            = 32.0f;
 
   public:
+    bool debug = false;
+
+  private:
+    void handle_sensor_events();
+
+  public:
     PhysicsServer2D();
     ~PhysicsServer2D();
-    bool debug = false;
 
     void debug_draw_colliders();
 
@@ -113,6 +122,10 @@ class PhysicsServer2D {
     Vec2 get_velocity(BodyID body_id);
 
     void step(float dt);
+
+    void register_entity();
+    void unregister_entity();
+    void get_entity_from_body();
 };
 
 } // namespace varicle::physics
