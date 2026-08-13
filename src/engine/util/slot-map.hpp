@@ -33,6 +33,8 @@ struct SlotID {
     std::string to_string() const {
         return std::format("idx: {} gen: {} ", index, generation);
     }
+
+    bool is_valid() { return index != std::numeric_limits<uint32_t>().max(); }
 };
 
 template <typename T> class SlotMap {
@@ -54,8 +56,7 @@ template <typename T> class SlotMap {
     std::vector<T>&       get_data() { return data; }
 
     T* get(SlotID id) {
-        if (id.index >= slots.size() ||
-            id.index == std::numeric_limits<uint32_t>().max()) {
+        if (id.index >= slots.size() || !id.is_valid()) {
             return nullptr;
         }
 
@@ -68,8 +69,7 @@ template <typename T> class SlotMap {
     }
 
     const T* get(SlotID id) const {
-        if (id.index >= slots.size() ||
-            id.index == std::numeric_limits<uint32_t>().max()) {
+        if (id.index >= slots.size() || !id.is_valid()) {
             return nullptr;
         }
 

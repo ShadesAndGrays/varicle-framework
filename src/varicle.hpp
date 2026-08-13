@@ -17,7 +17,7 @@
 #include "engine/core/engine-variant/engine-variant.hpp"
 
 #include "engine/ecs/components.hpp"
-#include "engine/physics/physics.hpp"
+#include "engine/physics/physics-server.hpp"
 #include "engine/render/render-system.hpp"
 #include "engine/scene/scene.hpp"
 

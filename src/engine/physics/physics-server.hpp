@@ -2,57 +2,10 @@
 
 #include "engine/core/engine-variant/engine-variant.hpp"
 #include "engine/util/slot-map.hpp"
+#include "physics-def.hpp"
 #include <box2d/box2d.h>
 
 namespace varicle::physics {
-using BodyID     = structures::SlotID;
-using ShapeID    = structures::SlotID;
-using ColliderID = structures::SlotID;
-
-enum class BodyMode {
-    STATIC,    // Unmoving
-    KINEMATIC, // Program and Velocity based
-    DYNAMIC,   // Simulated
-    ZONE       // Detection (no collision)
-};
-
-struct EventBodyEntered {
-    BodyID body_id;
-};
-
-} // namespace varicle::physics
-
-namespace varicle::shape {
-struct CircleShape {
-    float radius;
-};
-struct RectangleShape {
-    Vec2 half_extents;
-};
-
-using ShapeType = std::variant<std::monostate, CircleShape, RectangleShape>;
-
-} // namespace varicle::shape
-
-namespace varicle::physics {
-
-struct BodyData {
-    b2BodyId native_body_id = {};
-
-    ColliderID collider_id = {};
-
-    BodyMode mode = BodyMode::STATIC;
-};
-
-struct ShapeData {
-    b2ShapeId        native_shape_id = {};
-    shape::ShapeType ShapeType       = std::monostate();
-};
-
-struct ColliderData {
-    BodyID                         body_id = {};
-    structures::SlotMap<ShapeData> native_shape_ids;
-};
 
 class PhysicsServer2D {
   private:
@@ -60,7 +13,7 @@ class PhysicsServer2D {
     b2WorldId m_world_id;
     structures::SlotMap<BodyData>     m_bodies;
     structures::SlotMap<ColliderData> m_colliders;
-    structures::SlotMap<ColliderData> m_body_to_entity;
+    structures::SlotMap<entt::entity> m_body_to_entity;
 
     static constexpr float time_step      = 1.0f / 60.0f;
     static constexpr float sub_step_count = 4;
@@ -122,10 +75,6 @@ class PhysicsServer2D {
     Vec2 get_velocity(BodyID body_id);
 
     void step(float dt);
-
-    void register_entity();
-    void unregister_entity();
-    void get_entity_from_body();
 };
 
 } // namespace varicle::physics

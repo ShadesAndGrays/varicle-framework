@@ -8,7 +8,7 @@
 
 #include "engine/ecs/animation.hpp"
 #include "engine/ecs/bindings.hpp"
-#include "engine/physics/physics.hpp"
+#include "engine/physics/physics-server.hpp"
 #include "engine/scene/scene.hpp"
 // #include "imgui.h"
 #include "raylib.h"

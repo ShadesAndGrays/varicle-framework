@@ -1,4 +1,4 @@
-#include "physics.hpp"
+#include "physics-server.hpp"
 #include "box2d/types.h"
 #include "engine/core/event-bus.hpp"
 #include "engine/core/service-locator.hpp"
@@ -225,24 +225,21 @@ void PhysicsServer2D::step(float dt) {
 }
 
 void PhysicsServer2D::handle_sensor_events() {
-    b2SensorEvents sensorEvents = b2World_GetSensorEvents(m_world_id);
+    b2SensorEvents sensor_events = b2World_GetSensorEvents(m_world_id);
 
-    for (int i = 0; i < sensorEvents.beginCount; ++i) {
-        b2SensorBeginTouchEvent* beginTouch = sensorEvents.beginEvents + i;
-        std::cout << "in";
+    for (int i = 0; i < sensor_events.beginCount; ++i) {
+        b2SensorBeginTouchEvent* begin_touch = sensor_events.beginEvents + i;
 
-        if (void* myUserData =
-                b2Shape_GetUserData(beginTouch->visitorShapeId)) {
-            ServiceLocator::get<event::EventBus>().publish<EventBodyEntered>({
-                });
-        }
-
-        // process begin event
+        ServiceLocator::get<event::EventBus>().publish<EventBodyEntered>(
+            { b2Shape_GetBody(begin_touch->sensorShapeId) }
+        );
     }
 
-    for (int i = 0; i < sensorEvents.beginCount; ++i) {
-        b2SensorBeginTouchEvent* beginTouch = sensorEvents.beginEvents + i;
-        void* myUserData = b2Shape_GetUserData(beginTouch->visitorShapeId);
-        std::cout << "out";
+    for (int i = 0; i < sensor_events.endCount; ++i) {
+        b2SensorEndTouchEvent* end_touch = sensor_events.endEvents + i;
+
+        ServiceLocator::get<event::EventBus>().publish<EventBodyExited>(
+            { b2Shape_GetBody(end_touch->sensorShapeId) }
+        );
     }
 }

@@ -11,7 +11,8 @@ class MainScene : public v::Scene {
   private:
     entt::registry registry;
     entt::entity   player;
-    bool           pause = true;
+    float          player_speed = 100.0f;
+    bool           pause        = true;
 
   public:
     void init() override;
@@ -24,9 +25,9 @@ class MainScene : public v::Scene {
 
     void deinit() override {}
 
-    void        add_ground();
-    void        add_player();
-    void        add_zone();
+    void add_ground();
+    void add_player();
+    void add_zone(v::Vec2 intial_pos, bool connect_signals, std::string name);
     static void _on_zone_entered(ZoneEntered);
 };
 
@@ -50,25 +51,34 @@ void MainScene::init() {
         v::ServiceLocator::get<v::physics::PhysicsServer2D>();
     physics_server_2d.debug = true;
     add_ground();
-    add_zone();
+    add_player();
+    add_zone(v::Vec2{ 150, 300 }, true, "ZONE_1");
+    add_zone(v::Vec2{ 450, 300 }, true, "ZONE_2");
 }
 
 void MainScene::add_player() {
     player = registry.create();
+
+    const float width  = 10.0f;
+    const float height = 10.0f;
+
     v::SpriteUtil::add_sprite_component(
         registry,
         player,
         {
             .texture_path = "",
-            .width        = 100,
-            .height       = 100,
+            .width        = width,
+            .height       = height,
         }
     );
 
-    v::PhysicsUtil::add_dynamic_body_component(registry, player);
-    v::PhysicsUtil::add_rect_collider(registry, player, { 50, 50 });
+    v::PhysicsUtil::add_kinematic_body_component(registry, player);
+    v::PhysicsUtil::add_rect_collider(
+        registry, player, { width / 2, height / 2 }
+    );
     v::PhysicsUtil::set_rotation(registry, player, v::constants::pi / 3.9f);
-    v::PhysicsUtil::set_position(registry, player, v::Vec2{ 400, 100 });
+    v::PhysicsUtil::set_position(registry, player, v::Vec2{ 300, 300 });
+    v::PhysicsUtil::set_velocity(registry, player, { -player_speed, 0.0f });
 }
 
 void MainScene::add_ground() {
@@ -87,37 +97,64 @@ void MainScene::add_ground() {
     );
 }
 
-void MainScene::add_zone() {
+void MainScene::add_zone(
+    v::Vec2     intial_pos,
+    bool        connect_signals,
+    std::string name
+) {
     const auto zone = registry.create();
     v::PhysicsUtil::add_zone_body_component(registry, zone);
-    v::PhysicsUtil::set_position(registry, zone, v::Vec2{ 300, 300 });
-    // v::PhysicsUtil::set_velocity(registry, zone, { 0, 100 });
+    v::PhysicsUtil::set_position(registry, zone, intial_pos);
     v::PhysicsUtil::add_circle_collider(registry, zone, 100);
-    // v::ServiceLocator::get<v::event::EventBus>().subscribe<ZoneEntered>(
-    //     MainScene::_on_zone_entered
-    // );
+
+    if (!connect_signals)
+        return;
+    v::ServiceLocator::get<v::event::EventBus>()
+        .subscribe<v::physics::EventBodyEntered>(
+            [this, zone, name](v::physics::EventBodyEntered event) {
+                if (v::PhysicsUtil::is_entity_body(
+                        registry, zone, event.native_zone_body_id
+                    )) {
+                    std::cout << name << " Entered" << std::endl;
+                }
+            }
+        );
+
+    v::ServiceLocator::get<v::event::EventBus>()
+        .subscribe<v::physics::EventBodyExited>(
+            [this, zone, name](v::physics::EventBodyExited event) {
+                if (v::PhysicsUtil::is_entity_body(
+                        registry, zone, event.native_zone_body_id
+                    )) {
+                    std::cout << name << "Exited" << std::endl;
+                }
+            }
+        );
 }
 
 void MainScene::update(float dt) {
-    if (IsKeyPressed(KEY_SPACE)) {
-        add_player();
+
+    if (IsKeyDown(KEY_LEFT)) {
+        v::PhysicsUtil::set_velocity(registry, player, { -player_speed, 0.0f
+        });
+    } else if (IsKeyDown(KEY_RIGHT)) {
+        v::PhysicsUtil::set_velocity(registry, player, { player_speed, 0.0f
+        });
+    } else if (IsKeyDown(KEY_UP)) {
+        v::PhysicsUtil::set_velocity(registry, player, { 0.0f, -player_speed
+        });
+    } else if (IsKeyDown(KEY_DOWN)) {
+        v::PhysicsUtil::set_velocity(registry, player, { 0.0f, player_speed
+        });
+    } else {
+        v::PhysicsUtil::set_velocity(registry, player, { 0.0f, 0.0f });
     }
     v::PhysicsSystem::update_physics_system(registry, dt);
     v::TransformSystem::update_global_transform(registry);
-    // v::ServiceLocator::get<v::event::EventBus>().process_events();
 }
 
 void MainScene::render() {
     v::RenderSystem::update_render_system(registry);
-}
-
-void MainScene::_on_zone_entered(ZoneEntered event) {
-
-    if (event.zone_id == 0) {
-        std::cout << "Hit right zone " << "\n";
-    }
-
-    std::cout << "hit\n";
 }
 
 int main() {

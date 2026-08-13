@@ -1,7 +1,7 @@
 #pragma once
 #include "engine/core/service-locator.hpp"
 #include "engine/ecs/transform.hpp"
-#include "engine/physics/physics.hpp"
+#include "engine/physics/physics-server.hpp"
 
 namespace varicle::components {
 
@@ -54,6 +54,23 @@ class PhysicsUtil {
     }
 
   public:
+    static physics::BodyID
+    get_body_id(entt::registry& registry, entt::entity e) {
+        if (const auto body_component =
+                registry.try_get<components::Body2D>(e)) {
+            return body_component->body_id;
+        }
+        return { .index = std::numeric_limits<uint32_t>().max() };
+    }
+
+    static physics::BodyData*
+    get_body_data(entt::registry& registry, entt::entity e) {
+        auto& physics_server_2d =
+            ServiceLocator::get<physics::PhysicsServer2D>();
+        return physics_server_2d.get_body(get_body_id(registry, e));
+        return nullptr;
+    }
+
     static void
     set_velocity(entt::registry& registry, entt::entity e, Vec2 velocity) {
         if (const auto body_component =
@@ -62,6 +79,16 @@ class PhysicsUtil {
                 ServiceLocator::get<physics::PhysicsServer2D>();
             physics_server_2d.set_velocity(body_component->body_id, velocity);
         }
+    }
+    static Vec2
+    get_velocity(entt::registry& registry, entt::entity e) {
+        if (const auto body_component =
+                registry.try_get<components::Body2D>(e)) {
+            auto& physics_server_2d =
+                ServiceLocator::get<physics::PhysicsServer2D>();
+            return physics_server_2d.get_velocity(body_component->body_id);
+        }
+        std::unreachable();
     }
 
     static void
@@ -73,6 +100,24 @@ class PhysicsUtil {
             physics_server_2d.set_position(body_component->body_id, position);
         }
     }
+
+    static Vec2 get_position(entt::registry& registry, entt::entity e) {
+        if (const auto body_component =
+                registry.try_get<components::Body2D>(e)) {
+            auto& physics_server_2d =
+                ServiceLocator::get<physics::PhysicsServer2D>();
+            return physics_server_2d.get_position(body_component->body_id);
+        }
+        std::unreachable();
+    }
+
+    static bool is_entity_body(entt::registry& registry, entt::entity e,b2BodyId body) {
+        if (auto data = get_body_data(registry,e)) {
+            return B2_ID_EQUALS(data->native_body_id,body);
+        }
+        return false;
+    }
+
 
     static void
     set_rotation(entt::registry& registry, entt::entity e, float rotation) {

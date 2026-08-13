@@ -17,8 +17,11 @@ int main() {
 
 auto event = GreetingEvent{};
     bus.publish<GreetingEvent>(event);
+
     bus.defer<GreetingEvent>({.greeting="Bonjour"});
+
     bus.publish<GreetingEvent>({.greeting="Aloha"});
+
     bus.defer<GreetingEvent>({.greeting="Otutu oma"});
 
     bus.flush();
