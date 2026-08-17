@@ -23,6 +23,13 @@ struct Vec2 {
     Vec2 operator-(const Vec2& o) const { return { x - o.x, y - o.y }; }
     Vec2 operator*(float scalar) const { return { x * scalar, y * scalar }; }
     Vec2 operator*(int scalar) const { return { x * scalar, y * scalar }; }
+
+    constexpr static Vec2 ZERO() { return Vec2{ 0.0f, 0.0f }; }
+    constexpr static Vec2 ONE() { return Vec2{ 1.0f, 1.0f }; }
+    constexpr static Vec2 UP() { return Vec2{ 0.0f, 1.0f }; }
+    constexpr static Vec2 DOWN() { return Vec2{ 0.0f, -1.0f }; }
+    constexpr static Vec2 LEFT() { return Vec2{ -1.0f, 0.0f }; }
+    constexpr static Vec2 RIGHT() { return Vec2{ 1.0f, 0.0f }; }
 };
 
 struct Vec3 {

@@ -1,5 +1,6 @@
 #include "engine/scene/scene.hpp"
 #include "raylib.h"
+#include <iostream>
 
 namespace varicle {
 
@@ -28,6 +29,10 @@ void SceneManager::process_scene_switch() {
         current_scene.reset();
         current_scene = it->second();
         current_scene->init();
+    } else {
+        std::cerr << std::format(
+            "Scene \"{}\" does not exist\n", next_scene_id
+        );
     }
 
     next_scene_id.clear();

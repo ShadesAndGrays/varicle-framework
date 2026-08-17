@@ -7,7 +7,6 @@
 #include "engine/scene/scene.hpp"
 
 #include <entt/entt.hpp>
-#include <format>
 #include <raylib.h>
 
 namespace v = varicle;

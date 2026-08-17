@@ -137,6 +137,9 @@ BodyID PhysicsServer2D::create_body(BodyMode mode, Vec2 position) {
     case BodyMode::KINEMATIC:
         bodyDef.type = b2_kinematicBody;
         break;
+    case BodyMode::COLLIDABLE:
+        bodyDef.type = b2_kinematicBody;
+        break;
     case BodyMode::STATIC:
         bodyDef.type = b2_staticBody;
         break;

@@ -26,6 +26,7 @@ using ColliderID = structures::SlotID;
 enum class BodyMode {
     STATIC,    // Unmoving
     KINEMATIC, // Program and Velocity based
+    COLLIDABLE, // Program and Velocity based
     DYNAMIC,   // Simulated
     ZONE       // Detection (no collision)
 };
