@@ -1,9 +1,9 @@
 #pragma once
 #include "engine/core/engine-variant/engine-variant.hpp"
-#include "engine/ui/layout/fill.hpp"
+#include "engine/ui/layout/base_layout.hpp"
+#include "engine/ui/layout/default_layout.hpp"
 #include "engine/ui/strucutres.hpp"
 #include "engine/ui/ui-constraints.hpp"
-#include "engine/ui/layout/layout.hpp"
 #include <algorithm>
 #include <memory>
 #include <string>
@@ -18,9 +18,9 @@ class UINode : public std::enable_shared_from_this<UINode> {
     bool        active  = true;
 
     // Layout
-    UIAnchor anchor   = anchors::TopLeft;
-    Aligment aligment = Aligment::START;
-    SizingMode sizing_mode = SizingMode::EXACT;
+    UIAnchor   anchor      = anchors::TopLeft;
+    Aligment   alignment   = Aligment::START;
+    ContainerSizing container_sizing = {SizingMode::EXACT,SizingMode::EXACT};
 
     Vec2 pivot = { 0.0f, 0.0f };
 
@@ -32,7 +32,7 @@ class UINode : public std::enable_shared_from_this<UINode> {
     float offset_right  = 0.0f; // Width if min_x == max_x
     float offset_bottom = 0.0f; // Height if min_y == max_y
 
-    // 
+    //
     float bias = 0.0f;
 
     float margin_left   = 0.0f;
@@ -55,14 +55,18 @@ class UINode : public std::enable_shared_from_this<UINode> {
     std::vector<std::shared_ptr<UINode>> m_children;
 
   public:
-    UINode() { set_layout_strategy(std::make_unique<FillStrategy>()); }
+    UINode() { set_layout_strategy(std::make_unique<DefaultLayout>()); }
     virtual ~UINode() = default; //
 
     void add_child(std::shared_ptr<UINode> child) {
         child->m_parent = shared_from_this();
         m_children.push_back(child);
     }
-    std::vector<std::shared_ptr<UINode>> get_children() { return m_children; }
+    std::vector<std::shared_ptr<UINode>> get_children() const {
+        return m_children;
+    }
+
+    std::weak_ptr<UINode> get_parent() const { return m_parent; }
 
     void
     set_layout_strategy(std::unique_ptr<ILayoutStrategy> new_layout_strategy) {
@@ -117,7 +121,7 @@ class UINode : public std::enable_shared_from_this<UINode> {
         );
     }
 
-    virtual Vec2 get_content_size() { return Vec2::ZERO(); }
+    virtual Vec2 get_content_size() const { return Vec2::ZERO(); }
 
     virtual void update_layout(Rect allocated_space) {
 
@@ -190,7 +194,7 @@ class UINode : public std::enable_shared_from_this<UINode> {
     }
 
     // 3. RENDER PASS: Draw back-to-front
-    virtual void draw() {
+    virtual void draw() const {
         if (!visible)
             return;
 
@@ -202,7 +206,7 @@ class UINode : public std::enable_shared_from_this<UINode> {
     }
 
   protected:
-    virtual void draw_self() {}
+    virtual void draw_self() const {}
 };
 
 class UIUtil {};

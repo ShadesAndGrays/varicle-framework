@@ -20,7 +20,16 @@ class UIButton : public UINode {
     bool m_pressed = false;
 
   public:
+    UIButton() : text("") {}
     UIButton(std::string label) : text(std::move(label)) {}
+
+    Vec2 get_content_size() const override {
+        // return Vec2{ 100, 100 };
+        auto default_font = GetFontDefault();
+        auto size =
+            MeasureTextEx(default_font, text.c_str(), 18, 1);
+        return { size.x, size.y };
+    }
 
     bool process_input(Vec2 mouse_pos) override {
         if (UINode::process_input(mouse_pos))
@@ -52,7 +61,7 @@ class UIButton : public UINode {
     }
 
   protected:
-    void draw_self() override {
+    void draw_self() const override {
         varicle::Color bg_col = {};
         varicle::Color fg_col = {};
 

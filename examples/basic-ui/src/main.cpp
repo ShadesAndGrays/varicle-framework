@@ -1,4 +1,5 @@
 #include "scenes/layout-test/layout-test.hpp"
+#include "scenes/simple-ui-test/simple-ui-test.hpp"
 #include "scenes/test-ui/test-ui.hpp"
 #include "varicle.hpp"
 
@@ -22,7 +23,11 @@ class Game : public v::Application {
             return std::make_unique<LayoutTestScene>();
         });
 
-        sm.switch_to_scene("layout-ui");
+        sm.register_scene("simple-test-ui", []() {
+            return std::make_unique<SimpleUITestScene>();
+        });
+
+        sm.switch_to_scene("simple-test-ui");
     }
 
     void on_shutdown() override {}

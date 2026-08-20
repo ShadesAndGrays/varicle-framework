@@ -20,10 +20,15 @@ inline const UIAnchor Center{ 0.5f, 0.5f, 0.5f, 0.5f };
 inline const UIAnchor FullStretch{ 0.0f, 0.0f, 1.0f, 1.0f };
 } // namespace anchors
 
-// How node should arrange child node 
+// How node should arrange child node
 enum Aligment { START, CENTER, END };
-// How node size reacts  
+// How node size reacts
 enum SizingMode { EXACT, FILL };
+
+struct ContainerSizing {
+    SizingMode horizontal;
+    SizingMode vertical;
+};
 
 using Matrix2 = std::array<std::array<float, 3>, 3>;
 /*[

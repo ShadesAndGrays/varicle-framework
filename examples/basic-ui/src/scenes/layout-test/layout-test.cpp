@@ -1,5 +1,5 @@
 #include "layout-test.hpp"
-#include "engine/ui/layout/hstacking.hpp"
+
 #include "varicle.hpp"
 
 using namespace varicle;
@@ -20,27 +20,41 @@ void LayoutTestScene::init() {
           static_cast<float>(GetScreenHeight()) }
     );
 
-    auto parent = std::make_shared<ui::UIPanel>();
+    root->set_layout_strategy(std::make_unique<ui::FillStrategy>());
 
+    auto grand_parent       = std::make_shared<ui::UIPanel>();
+    grand_parent->alignment = ui::Aligment::CENTER;
+    grand_parent->set_layout_strategy(
+        std::make_unique<ui::HStackingStrategy>()
+    );
+    grand_parent->bg_color = { 0, 0, 0, 50 };
+    grand_parent->container_sizing = {ui::SizingMode::FILL,ui::SizingMode::FILL};
 
-    auto tim = std::make_shared<ui::UIPanel>();
-    tim->padding_top = 50;
+    auto parent       = std::make_shared<ui::UIPanel>();
+    parent->alignment = ui::Aligment::CENTER;
+    parent->set_layout_strategy(std::make_unique<ui::VStackingStrategy>());
+    parent->bg_color    = varicle::Color::Purple();
+    parent->container_sizing = {ui::SizingMode::EXACT, ui::SizingMode::FILL};
+    parent->bias        = 1.0f;
+
+    auto tim           = std::make_shared<ui::UIPanel>();
+    tim->padding_top   = 50;
     tim->padding_right = 50;
-    tim->sizing_mode = ui::SizingMode::EXACT;
-    tim->bg_color = varicle::Color::Red();
+    tim->bg_color      = { 0, 0, 0, 50 };
+    tim->bg_color      = varicle::Color::Red();
 
-    auto ben = std::make_shared<ui::UIPanel>();
-    ben->padding_top = 90;
+    auto ben           = std::make_shared<ui::UIPanel>();
+    ben->padding_top   = 90;
     ben->padding_right = 60;
-    ben->bias = 1.0f;
-    ben->sizing_mode = ui::SizingMode::FILL;
-    ben->bg_color = varicle::Color::Green();
+    ben->bias          = 1.0f;
+    ben->bg_color = { 0, 0, 0, 50 };
+    ben->bg_color      = varicle::Color::Green();
 
-    auto samantha = std::make_shared<ui::UIPanel>();
-    samantha->padding_top = 90;
+    auto samantha           = std::make_shared<ui::UIPanel>();
+    samantha->padding_top   = 90;
     samantha->padding_right = 30;
-    samantha->sizing_mode = ui::SizingMode::EXACT;
-    samantha->bg_color = varicle::Color::Yellow();
+    samantha->bg_color = { 0, 0, 0, 50 };
+    samantha->bg_color      = varicle::Color::Yellow();
 
     // create children and give them to the parent
     // auto child1            = std::make_shared<ui::UIPanel>();
@@ -64,7 +78,6 @@ void LayoutTestScene::init() {
     // parent->padding_bottom = 10.0f;
     // parent->padding_left   = 10.0f;
     // parent->padding_right  = 10.0f;
-    parent->set_layout_strategy(std::make_unique<ui::HStackingStrategy>());
 
     // parent->margin_top    = 10.0f;
     // parent->margin_bottom = 10.0f;
@@ -74,7 +87,9 @@ void LayoutTestScene::init() {
     parent->add_child(std::move(tim));
     parent->add_child(std::move(ben));
     parent->add_child(std::move(samantha));
-    root->add_child(std::move(parent));
+    grand_parent->add_child(std::move(parent));
+    root->add_child(std::move(grand_parent));
+#define DEBUG_LAYOUT_TEST
 
     // This would normally run in a loop of via and event callback;
     // Measure Pass
@@ -83,25 +98,48 @@ void LayoutTestScene::init() {
     // Arrange Pass
     root->update_layout(root->get_global_rect());
 
+#ifdef DEBUG_LAYOUT_TEST
     std::cout << std::format(
-        "root preferred_size: {}\nparent preferred_size: {}\nchild1 "
-        "preferred_size:  {}\nchild2 preferred_size:  {}\n",
+        "root preferred_size: {}\n"
+        "grand_parent preferred_size: {}\n"
+        "parent preferred_size: {}\n"
+        "tim preferred_size : {}\n"
+        "ben preferred_size : {}\n "
+        "samantha preferred_size : {}\n ",
         EngineVariant(root->preferred_size).to_string(),
         EngineVariant(root->get_children()[0]->preferred_size).to_string(),
         EngineVariant(
             root->get_children()[0]->get_children()[0]->preferred_size
         )
             .to_string(),
-        EngineVariant(
-            root->get_children()[0]->get_children()[1]->preferred_size
-        )
+
+        EngineVariant(root->get_children()[0]
+                          ->get_children()[0]
+                          ->get_children()[0]
+                          ->preferred_size)
+            .to_string(),
+        EngineVariant(root->get_children()[0]
+                          ->get_children()[0]
+                          ->get_children()[1]
+                          ->preferred_size)
+            .to_string(),
+
+        EngineVariant(root->get_children()[0]
+                          ->get_children()[0]
+                          ->get_children()[2]
+                          ->preferred_size)
             .to_string()
     );
 
     std::cout << std::format(
-        "root rect: {}\nparent rect: {}\ntim rect:  {}\nben rect:  {}\n "
+        "root rect: {}\n"
+        "grand_parent rect: {}\n"
+        "parent rect: {}\n"
+        "tim rect:  {}\n"
+        "ben rect:  {}\n"
         "samantha rect:  {}\n",
         root->get_global_rect().to_string(),
+
         root->get_children()[0]->get_global_rect().to_string(),
 
         root->get_children()[0]
@@ -110,18 +148,26 @@ void LayoutTestScene::init() {
             .to_string(),
 
         root->get_children()[0]
+            ->get_children()[0]
+            ->get_children()[0]
+            ->get_global_rect()
+            .to_string(),
+
+        root->get_children()[0]
+            ->get_children()[0]
             ->get_children()[1]
             ->get_global_rect()
             .to_string(),
 
         root->get_children()[0]
+            ->get_children()[0]
             ->get_children()[2]
             ->get_global_rect()
             .to_string()
 
     );
 
-    // ServiceLocator::get<SceneManager>().quit();
+#endif
 }
 
 void LayoutTestScene::update(float dt) {}
@@ -130,6 +176,7 @@ void LayoutTestScene::render() {
 
     // Render Pass
     root->draw();
+    DrawCircleV({ 1280 / 2, 720 / 2 }, 10, ::RED);
 }
 
 void LayoutTestScene::ui() {}

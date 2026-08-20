@@ -135,17 +135,13 @@ void MainScene::add_zone(
 void MainScene::update(float dt) {
 
     if (IsKeyDown(KEY_LEFT)) {
-        v::PhysicsUtil::set_velocity(registry, player, { -player_speed, 0.0f
-        });
+        v::PhysicsUtil::set_velocity(registry, player, { -player_speed, 0.0f });
     } else if (IsKeyDown(KEY_RIGHT)) {
-        v::PhysicsUtil::set_velocity(registry, player, { player_speed, 0.0f
-        });
+        v::PhysicsUtil::set_velocity(registry, player, { player_speed, 0.0f });
     } else if (IsKeyDown(KEY_UP)) {
-        v::PhysicsUtil::set_velocity(registry, player, { 0.0f, -player_speed
-        });
+        v::PhysicsUtil::set_velocity(registry, player, { 0.0f, -player_speed });
     } else if (IsKeyDown(KEY_DOWN)) {
-        v::PhysicsUtil::set_velocity(registry, player, { 0.0f, player_speed
-        });
+        v::PhysicsUtil::set_velocity(registry, player, { 0.0f, player_speed });
     } else {
         v::PhysicsUtil::set_velocity(registry, player, { 0.0f, 0.0f });
     }

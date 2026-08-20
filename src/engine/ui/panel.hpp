@@ -9,7 +9,7 @@ class UIPanel : public UINode {
     bool           draw_background = true;
 
   protected:
-    void draw_self() override {
+    void draw_self() const override {
         if (draw_background) {
             DrawRectangleRec(
                 Rectangle{
